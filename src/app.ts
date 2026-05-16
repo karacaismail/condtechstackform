@@ -538,15 +538,159 @@ function render(): void {
 }
 
 // =============================================================
+// Senaryolar — JSON content cards + modal
+// =============================================================
+
+import { SCENARIOS, type Scenario } from './scenarios';
+
+function renderScenarios(): void {
+  const root = document.getElementById('scenarios-grid');
+  if (!root) return;
+  root.innerHTML = SCENARIOS.map((s) => `
+    <button class="scenario-card scenario-${s.color}" data-scenario="${escape(s.id)}">
+      <span class="scenario-icon"><i class="ph-duotone ${escape(s.icon)}"></i></span>
+      <span class="scenario-meta">
+        <span class="scenario-badge">${escape(s.badge)}</span>
+      </span>
+      <span class="scenario-title">${escape(s.title)}</span>
+      <span class="scenario-summary">${escape(s.summary)}</span>
+      <span class="scenario-cta">
+        <i class="ph ph-arrow-up-right"></i> Detayı aç
+      </span>
+    </button>
+  `).join('');
+
+  root.querySelectorAll<HTMLButtonElement>('.scenario-card').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const id = btn.dataset['scenario'];
+      if (id) openScenarioModal(id);
+    });
+  });
+}
+
+function findStepOption(stepId: string, optId: string): { step?: DecisionStep; opt?: DecisionOption } {
+  const step = STEPS.find((s) => s.id === stepId);
+  const opt = step?.options.find((o) => o.id === optId);
+  return { step, opt };
+}
+
+function openScenarioModal(scenarioId: string): void {
+  const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+  const modal = document.getElementById('scenario-modal');
+  const body  = document.getElementById('scenario-modal-body');
+  if (!scenario || !modal || !body) return;
+
+  const answersHtml = Object.entries(scenario.answers).map(([stepId, optId]) => {
+    const { step, opt } = findStepOption(stepId, optId);
+    if (!step || !opt) return '';
+    return `
+      <div class="modal-answer">
+        <span class="modal-answer-q">${escape(step.title)}</span>
+        <span class="pill"><i class="ph-duotone ${escape(opt.icon)}"></i> ${escape(opt.label)}</span>
+      </div>
+    `;
+  }).join('');
+
+  const rationaleHtml = scenario.rationale.map((r) => `
+    <div class="modal-rationale">
+      <h4>${escape(r.heading)}</h4>
+      <p>${escape(r.body)}</p>
+    </div>
+  `).join('');
+
+  const pitfallsHtml = scenario.pitfalls.map((p) => `
+    <li><i class="ph ph-warning-circle"></i> ${escape(p)}</li>
+  `).join('');
+
+  body.innerHTML = `
+    <div class="modal-head scenario-${scenario.color}">
+      <span class="modal-head-icon"><i class="ph-duotone ${escape(scenario.icon)}"></i></span>
+      <div class="modal-head-text">
+        <span class="scenario-badge">${escape(scenario.badge)}</span>
+        <h2>${escape(scenario.title)}</h2>
+        <p>${escape(scenario.summary)}</p>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3><i class="ph ph-identification-card"></i> Proje profili</h3>
+      <div class="modal-profile">
+        <div><span>Ekip</span><strong>${escape(scenario.profile.team)}</strong></div>
+        <div><span>Süre</span><strong>${escape(scenario.profile.timeline)}</strong></div>
+        <div><span>Sektör</span><strong>${escape(scenario.profile.industry)}</strong></div>
+        <div><span>Ölçek</span><strong>${escape(scenario.profile.scale)}</strong></div>
+      </div>
+    </div>
+
+    <div class="modal-section">
+      <h3><i class="ph ph-check-square"></i> Sihirbaz cevapları</h3>
+      <div class="modal-answers">${answersHtml}</div>
+    </div>
+
+    <div class="modal-section">
+      <h3><i class="ph ph-lightbulb"></i> Neden bu seçimler?</h3>
+      <div class="modal-rationales">${rationaleHtml}</div>
+    </div>
+
+    <div class="modal-section">
+      <h3><i class="ph ph-warning"></i> Dikkat edilecekler</h3>
+      <ul class="modal-pitfalls">${pitfallsHtml}</ul>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn" id="modal-close-btn"><i class="ph ph-x"></i> Kapat</button>
+      <button class="btn btn-primary" id="modal-apply-btn" data-scenario="${escape(scenario.id)}">
+        <i class="ph ph-lightning"></i> Bu senaryoyu uygula → Kanban oluştur
+      </button>
+    </div>
+  `;
+
+  modal.classList.add('show');
+  document.body.style.overflow = 'hidden';
+
+  document.getElementById('modal-close-btn')?.addEventListener('click', closeScenarioModal);
+  document.getElementById('modal-apply-btn')?.addEventListener('click', () => {
+    applyScenario(scenario.id);
+    closeScenarioModal();
+  });
+}
+
+function closeScenarioModal(): void {
+  const modal = document.getElementById('scenario-modal');
+  if (!modal) return;
+  modal.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function applyScenario(scenarioId: string): void {
+  const scenario = SCENARIOS.find((s) => s.id === scenarioId);
+  if (!scenario) return;
+  // Cevapları doğrudan state'e yaz, wizard'ı tamamlanmış sayan currentStep'e at
+  state.answers = { ...scenario.answers };
+  state.currentStep = STEPS.length;
+  render();
+  // Yumuşak scroll, formu/Kanban'ı görünür yap
+  window.scrollTo({ top: document.getElementById('layout')?.offsetTop ?? 0, behavior: 'smooth' });
+}
+
+// =============================================================
 // Init
 // =============================================================
 
 document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-reset')?.addEventListener('click', reset);
+  // Senaryo modal — backdrop tıklamasında kapat, Esc tuşunda kapat
+  document.getElementById('scenario-modal')?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).id === 'scenario-modal') closeScenarioModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeScenarioModal();
+  });
+  renderScenarios();
   reset();
 });
 
 // Test edilebilirlik için window'a expose (cast ile — global augmentation modüler dosyada gereksiz)
-(window as unknown as { __wizard: unknown }).__wizard = { state, evaluate, conditionsMatch, STEPS, RECS };
+(window as unknown as { __wizard: unknown }).__wizard = { state, evaluate, conditionsMatch, STEPS, RECS, SCENARIOS, applyScenario };
 
 export {}; // bu dosyayı modül olarak işaretle
