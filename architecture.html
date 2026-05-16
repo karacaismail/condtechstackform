@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Mimari Katmanlar — Meta-Framework (Eğitim Kanban'ı)</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css" />
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.2/dist/flowbite.min.css" rel="stylesheet" />
+
+<style>
+:root {
+  --ff-base: 'Roboto', system-ui, sans-serif;
+  --fs-base: 1rem;
+  --fw-light: 300; --fw-reg: 400; --fw-med: 500; --fw-bold: 700;
+  --c-bg: #f8fafc;
+  --c-surface: #ffffff;
+  --c-border: #e2e8f0;
+  --c-text: #0f172a;
+  --c-text-muted: #475569;
+  --c-primary: #4f46e5;
+  --c-primary-soft: #eef2ff;
+  --radius-sm: 6px;
+  --radius: 10px;
+  --radius-lg: 14px;
+  --shadow-1: 0 1px 2px rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+  --shadow-2: 0 4px 12px rgba(15,23,42,.06), 0 2px 4px rgba(15,23,42,.04);
+
+  /* Katman renk tokenları */
+  --l1:  #2563eb; /* Client      */
+  --l2:  #dc2626; /* Edge        */
+  --l3:  #0891b2; /* API         */
+  --l4:  #4f46e5; /* Application */
+  --l5:  #7c3aed; /* Domain      */
+  --l6:  #db2777; /* AI          */
+  --l7:  #ea580c; /* Tenant      */
+  --l8:  #16a34a; /* Persistence */
+  --l9:  #d97706; /* DX          */
+  --l10: #475569; /* Ops         */
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; font-family: var(--ff-base); font-size: var(--fs-base) !important; line-height: 1.55; color: var(--c-text); background: var(--c-bg); font-weight: var(--fw-reg); }
+body { padding: 0; }
+
+.shell { max-width: 100%; margin: 0; padding: 1.25rem 1.5rem 4rem; }
+.topbar {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  padding: 1rem 1.25rem;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-1);
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+}
+.brand { display: flex; align-items: center; gap: .75rem; font-weight: var(--fw-med); font-size: 1.125rem; }
+.brand i { color: var(--c-primary); font-size: 1.75rem; }
+.nav-links { display: flex; gap: .5rem; flex-wrap: wrap; }
+.nav-link {
+  display: inline-flex; align-items: center; gap: .45rem;
+  padding: .55rem .95rem; border-radius: var(--radius);
+  border: 1.5px solid var(--c-border); background: #fff; color: var(--c-text);
+  text-decoration: none; font-weight: var(--fw-med); font-size: 1rem;
+  transition: all .15s;
+}
+.nav-link:hover { border-color: var(--c-primary); color: var(--c-primary); }
+.nav-link.active { background: var(--c-primary-soft); border-color: var(--c-primary); color: var(--c-primary); }
+
+.intro {
+  background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem; margin-bottom: 1rem; box-shadow: var(--shadow-1);
+}
+.intro h1 { margin: 0 0 .35rem; font-size: 1.75rem; font-weight: var(--fw-med); }
+.intro p { margin: 0; color: var(--c-text-muted); font-weight: var(--fw-light); }
+.intro .legend { display: flex; gap: .4rem; flex-wrap: wrap; margin-top: .85rem; }
+.legend-item { display: inline-flex; align-items: center; gap: .35rem; padding: .25rem .6rem; border-radius: 999px; background: #f1f5f9; border: 1px solid #e2e8f0; font-size: 1rem; }
+.legend-dot { width: .85rem; height: .85rem; border-radius: 3px; }
+
+/* Senaryo özeti */
+.scenario-summary {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #fff; border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem;
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 1.5rem;
+}
+@media (max-width: 900px) { .scenario-summary { grid-template-columns: 1fr; } }
+.scenario-summary h2 { margin: 0 0 .35rem; font-size: 1.5rem; font-weight: var(--fw-med); }
+.scenario-summary p { margin: 0; font-weight: var(--fw-light); opacity: .92; }
+.scenario-tags { display: flex; flex-wrap: wrap; gap: .35rem; align-items: flex-start; }
+.scenario-tag {
+  background: rgba(255,255,255,.18);
+  padding: .25rem .65rem; border-radius: 999px;
+  font-size: 1rem !important; font-weight: var(--fw-med);
+}
+
+/* Kanban — yatay scroll, sabit kolon genişlik */
+.board-wrap {
+  background: var(--c-surface); border: 1px solid var(--c-border); border-radius: var(--radius-lg);
+  padding: 1rem; box-shadow: var(--shadow-1);
+  overflow-x: auto;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 320px);
+  gap: .85rem;
+  min-width: max-content;
+}
+.column {
+  background: #f8fafc;
+  border-radius: var(--radius);
+  padding: 0;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.column-head {
+  padding: .85rem 1rem;
+  color: #fff;
+  display: flex; align-items: center; gap: .55rem;
+  font-weight: var(--fw-med);
+}
+.column-head .layer-num {
+  background: rgba(255,255,255,.22);
+  border-radius: 6px;
+  width: 1.85rem; height: 1.85rem;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: var(--fw-bold); font-size: 1rem !important;
+}
+.column-head i { font-size: 1.4rem; }
+.column-head .layer-title { flex: 1; font-size: 1rem !important; line-height: 1.2; }
+.column-head .layer-cn { font-size: 1rem !important; font-weight: var(--fw-light); opacity: .9; }
+
+.column[data-layer="1"]  .column-head { background: var(--l1); }
+.column[data-layer="2"]  .column-head { background: var(--l2); }
+.column[data-layer="3"]  .column-head { background: var(--l3); }
+.column[data-layer="4"]  .column-head { background: var(--l4); }
+.column[data-layer="5"]  .column-head { background: var(--l5); }
+.column[data-layer="6"]  .column-head { background: var(--l6); }
+.column[data-layer="7"]  .column-head { background: var(--l7); }
+.column[data-layer="8"]  .column-head { background: var(--l8); }
+.column[data-layer="9"]  .column-head { background: var(--l9); }
+.column[data-layer="10"] .column-head { background: var(--l10); }
+
+.column-body { padding: .65rem; display: flex; flex-direction: column; gap: .55rem; flex: 1; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--c-border);
+  border-left: 3px solid var(--c-primary);
+  border-radius: var(--radius-sm);
+  padding: .7rem .8rem;
+}
+.card-title {
+  display: flex; align-items: center; gap: .4rem;
+  font-weight: var(--fw-med); margin-bottom: .25rem;
+}
+.card-title i { font-size: 1.1rem; }
+.card-role { color: var(--c-text-muted); font-weight: var(--fw-light); margin: 0 0 .45rem; }
+.card-sub { margin: 0; padding-left: 1.1rem; }
+.card-sub li {
+  font-size: 1rem !important; line-height: 1.45;
+  margin-bottom: .2rem; color: var(--c-text);
+  font-weight: var(--fw-light);
+}
+.card-sub li strong { font-weight: var(--fw-med); color: var(--c-text); }
+.tag-row { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .35rem; }
+.tag {
+  display: inline-flex; align-items: center; gap: .25rem;
+  font-size: 1rem !important;
+  padding: .1rem .5rem; border-radius: 999px;
+  background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0;
+  font-weight: var(--fw-med);
+}
+.tag.must   { background: #fee2e2; color: #991b1b; border-color: #fecaca; }
+.tag.now    { background: #ecfccb; color: #3f6212; border-color: #d9f99d; }
+.tag.later  { background: #e0f2fe; color: #075985; border-color: #bae6fd; }
+.tag.option { background: #f3e8ff; color: #6b21a8; border-color: #e9d5ff; }
+
+.column[data-layer="1"]  .card { border-left-color: var(--l1); }
+.column[data-layer="2"]  .card { border-left-color: var(--l2); }
+.column[data-layer="3"]  .card { border-left-color: var(--l3); }
+.column[data-layer="4"]  .card { border-left-color: var(--l4); }
+.column[data-layer="5"]  .card { border-left-color: var(--l5); }
+.column[data-layer="6"]  .card { border-left-color: var(--l6); }
+.column[data-layer="7"]  .card { border-left-color: var(--l7); }
+.column[data-layer="8"]  .card { border-left-color: var(--l8); }
+.column[data-layer="9"]  .card { border-left-color: var(--l9); }
+.column[data-layer="10"] .card { border-left-color: var(--l10); }
+
+/* Akış oku — katmanlar arası bağlantı (opsiyonel görsel ipucu) */
+.flow-note {
+  margin-top: 1rem; background: var(--c-surface); border: 1px solid var(--c-border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem; box-shadow: var(--shadow-1);
+}
+.flow-note h3 { margin: 0 0 .65rem; font-size: 1.25rem; font-weight: var(--fw-med); display: flex; align-items: center; gap: .5rem; }
+.flow-note h3 i { color: var(--c-primary); }
+.flow-note p { margin: 0 0 .45rem; color: var(--c-text); font-weight: var(--fw-light); }
+.flow-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: .75rem; margin-top: .75rem; }
+.flow-step { background: #f8fafc; border: 1px solid var(--c-border); border-radius: var(--radius); padding: .65rem .85rem; }
+.flow-step strong { display: block; margin-bottom: .15rem; font-weight: var(--fw-med); color: var(--c-primary); }
+.flow-step p { margin: 0; color: var(--c-text-muted); font-weight: var(--fw-light); }
+
+/* Print */
+@media print {
+  .topbar, .nav-links { display: none; }
+  .board { grid-template-columns: repeat(2, 1fr); gap: .5rem; }
+  .column { break-inside: avoid; page-break-inside: avoid; }
+  body { background: #fff; }
+}
+</style>
+</head>
+
+<body>
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">
+      <i class="ph-duotone ph-stack"></i>
+      <span>Meta-Framework — Mimari Katmanlar</span>
+    </div>
+    <div class="nav-links">
+      <a class="nav-link" href="./"><i class="ph ph-arrow-left"></i> Sihirbaza dön</a>
+      <a class="nav-link active" href="./architecture.html"><i class="ph-duotone ph-stack-simple"></i> Mimari Katmanlar</a>
+      <a class="nav-link" href="javascript:window.print()"><i class="ph ph-printer"></i> Yazdır</a>
+    </div>
+  </div>
+
+  <div class="intro">
+    <h1>10 Katmanlı Mimari Kanban — Eğitim Notları</h1>
+    <p>Aşağıdaki tablo, sihirbazda yaptığın seçimlere göre üretilen statik referans mimari. Her sütun bir mimari katman; her kart bir bileşen + alt senaryo + karar gerekçesi içerir. Ekip eğitim oturumunda sırayla aşağı, sonra yana okumak için tasarlandı.</p>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l1)"></span> 1 · Client</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l2)"></span> 2 · Edge</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l3)"></span> 3 · API</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l4)"></span> 4 · Application</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l5)"></span> 5 · Domain</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l6)"></span> 6 · AI</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l7)"></span> 7 · Tenant</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l8)"></span> 8 · Persistence</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l9)"></span> 9 · DX</span>
+      <span class="legend-item"><span class="legend-dot" style="background: var(--l10)"></span> 10 · Ops</span>
+    </div>
+  </div>
+
+  <div class="scenario-summary">
+    <div>
+      <h2>Senaryo: Meta-Framework (vibecoding'e açık)</h2>
+      <p>Başkasına framework satıyorsun. Solo başlangıç, AI-first, white-label tenant, MIT + Managed Cloud. Detaylı katman ayrımı bu seçimlere uyarlanmıştır.</p>
+    </div>
+    <div class="scenario-tags">
+      <span class="scenario-tag">Meta-Framework</span>
+      <span class="scenario-tag">White-label tenant</span>
+      <span class="scenario-tag">AI-First / Agents</span>
+      <span class="scenario-tag">Karma SQL+Document</span>
+      <span class="scenario-tag">Hybrid BM25+Vector</span>
+      <span class="scenario-tag">Bildirim real-time</span>
+      <span class="scenario-tag">PWA</span>
+      <span class="scenario-tag">Vibecoding kritik</span>
+      <span class="scenario-tag">Tek Hetzner VPS</span>
+      <span class="scenario-tag">MIT + Managed</span>
+    </div>
+  </div>
+
+  <div class="board-wrap">
+    <div class="board">
+
+      <!-- ============ LAYER 1: CLIENT ============ -->
+      <div class="column" data-layer="1">
+        <div class="column-head">
+          <span class="layer-num">1</span>
+          <i class="ph-duotone ph-monitor"></i>
+          <div>
+            <div class="layer-title">Client Katmanı</div>
+            <div class="layer-cn">Sunum — Presentation</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-device-mobile"></i> PWA Shell</div>
+            <p class="card-role">Web tarayıcı ana erişim, offline'a dirençli</p>
+            <ul class="card-sub">
+              <li><strong>Service Worker</strong> — istek cache, offline fallback</li>
+              <li><strong>manifest.json</strong> — add-to-home + ikon seti</li>
+              <li><strong>IndexedDB queue</strong> — offline aksiyon buffer</li>
+              <li><strong>Background Sync API</strong> — bağlantı dönüşte gönder</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 1</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-paint-brush"></i> UI Komponent Kütüphanesi</div>
+            <p class="card-role">Flowbite tabanlı, Tailwind utility-first</p>
+            <ul class="card-sub">
+              <li><strong>Flowbite 2.5</strong> — modal, drawer, dropdown, table</li>
+              <li><strong>Phosphor</strong> — ikonografi (CDN)</li>
+              <li><strong>Custom tokens</strong> — CSS variables (renk, spacing)</li>
+              <li><strong>Roboto 300+</strong> — min 1rem text disiplini</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 0</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-devices"></i> Adaptive Breakpoints</div>
+            <p class="card-role">Cihaz spektrumuna uyum</p>
+            <ul class="card-sub">
+              <li><strong>Container queries</strong> — component-level responsive</li>
+              <li><strong>Tailwind sm/md/lg/xl</strong> — sayfa-level grid</li>
+              <li><strong>Touch + hover</strong> — input modalite ayrımı</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-palette"></i> Theming Engine</div>
+            <p class="card-role">White-label per-tenant brand</p>
+            <ul class="card-sub">
+              <li><strong>CSS değişken katmanı</strong> — --c-brand-{50..900}</li>
+              <li><strong>Logo + ikon override</strong> — tenant manifest'inden</li>
+              <li><strong>Dark mode</strong> — opsiyonel toggle</li>
+              <li><strong>E-mail şablonu</strong> — aynı paletten render</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-translate"></i> i18n</div>
+            <p class="card-role">Çok dilli içerik + UI</p>
+            <ul class="card-sub">
+              <li><strong>Locale catalog</strong> — JSON (TR + EN baz)</li>
+              <li><strong>Lazy load</strong> — locale başına bundle</li>
+              <li><strong>Browser locale</strong> — auto-detect + fallback</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 5</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-device-mobile-camera"></i> Native (Expo)</div>
+            <p class="card-role">v0.2 — backlog</p>
+            <ul class="card-sub">
+              <li><strong>Monorepo</strong> — paylaşılan UI tokenları</li>
+              <li><strong>Native modüller</strong> — kamera, biometric, push</li>
+              <li><strong>OTA update</strong> — Expo update channel</li>
+            </ul>
+            <div class="tag-row"><span class="tag later">v0.2</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 2: EDGE / GATEWAY ============ -->
+      <div class="column" data-layer="2">
+        <div class="column-head">
+          <span class="layer-num">2</span>
+          <i class="ph-duotone ph-shield-check"></i>
+          <div>
+            <div class="layer-title">Edge / Gateway</div>
+            <div class="layer-cn">Giriş — Ingress</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-shipping-container"></i> Caddy Reverse Proxy</div>
+            <p class="card-role">Tek VPS için tek binary çözüm</p>
+            <ul class="card-sub">
+              <li><strong>TLS auto</strong> — Let's Encrypt + ZeroSSL</li>
+              <li><strong>HTTP/3</strong> — QUIC native</li>
+              <li><strong>Tenant subdomain</strong> — *.tenant.framework.io</li>
+              <li><strong>Custom domain</strong> — CNAME mapping (managed)</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 0</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-lock-key"></i> Write Protection</div>
+            <p class="card-role">Tahtada daire içindeki kritik bant</p>
+            <ul class="card-sub">
+              <li><strong>JWT/session doğrulama</strong> — yazma uçları zorunlu</li>
+              <li><strong>CSRF token</strong> — double-submit cookie</li>
+              <li><strong>tenant_id enjeksiyonu</strong> — her sorguya zorlanır</li>
+              <li><strong>Idempotency-Key</strong> — POST tekrar koruması</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 1</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-gauge"></i> Rate Limit</div>
+            <p class="card-role">Kötüye kullanım + cost guard</p>
+            <ul class="card-sub">
+              <li><strong>Redis token bucket</strong> — sliding window</li>
+              <li><strong>Per-tenant + per-endpoint</strong> — quota</li>
+              <li><strong>Anonim IP-based</strong> — baseline</li>
+              <li><strong>AI endpoint özel</strong> — token / dakika</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-list-checks"></i> Security Headers</div>
+            <p class="card-role">CSP + clickjacking + HSTS</p>
+            <ul class="card-sub">
+              <li><strong>CSP</strong> — script + img kaynak whitelist</li>
+              <li><strong>X-Frame-Options</strong> — iframe yasak default</li>
+              <li><strong>HSTS</strong> — preload</li>
+              <li><strong>Permissions-Policy</strong> — kamera/mikrofon gate</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-cloud-arrow-down"></i> Static Asset CDN</div>
+            <p class="card-role">MinIO origin + Caddy edge cache</p>
+            <ul class="card-sub">
+              <li><strong>Bucket prefix</strong> — tenant başına yol</li>
+              <li><strong>Image transform</strong> — boyutla on-the-fly</li>
+              <li><strong>Signed URL</strong> — private asset</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-shield-warning"></i> WAF (opsiyonel)</div>
+            <p class="card-role">Cloudflare frontmost — büyürken</p>
+            <ul class="card-sub">
+              <li><strong>Bot management</strong> — challenge ladder</li>
+              <li><strong>OWASP rule set</strong> — SQL/XSS guard</li>
+              <li><strong>Geo block</strong> — gerekirse</li>
+            </ul>
+            <div class="tag-row"><span class="tag option">Opsiyonel</span><span class="tag later">v0.2+</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 3: API SURFACE ============ -->
+      <div class="column" data-layer="3">
+        <div class="column-head">
+          <span class="layer-num">3</span>
+          <i class="ph-duotone ph-plugs-connected"></i>
+          <div>
+            <div class="layer-title">API Yüzeyi</div>
+            <div class="layer-cn">Kontrak — Contract</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-lightning-a"></i> FastAPI Uygulaması</div>
+            <p class="card-role">Tahtada kırmızı — birincil backend</p>
+            <ul class="card-sub">
+              <li><strong>uvicorn async worker</strong> — N×CPU</li>
+              <li><strong>Pydantic v2</strong> — input/output şema</li>
+              <li><strong>OpenAPI 3.1</strong> — otomatik üretim</li>
+              <li><strong>Dependency injection</strong> — port adapter swap</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 0</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-tree-structure"></i> REST Endpoints</div>
+            <p class="card-role">CRUD jeneratörü ile otomatik</p>
+            <ul class="card-sub">
+              <li><strong>Doctype → REST</strong> — entity tanımından üretilir</li>
+              <li><strong>Pagination + filter + sort</strong> — standart query</li>
+              <li><strong>OData-benzeri DSL</strong> — ?filter=...&amp;sort=...</li>
+              <li><strong>HATEOAS opsiyonel</strong> — discovery link</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-brackets-curly"></i> Typed RPC</div>
+            <p class="card-role">TS SDK paketi (npm registry)</p>
+            <ul class="card-sub">
+              <li><strong>End-to-end tip güvencesi</strong> — schema → TS</li>
+              <li><strong>Auto-generated client</strong> — build pipeline</li>
+              <li><strong>tRPC tarzı imza</strong> — Pydantic'tan üretim</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-graph"></i> GraphQL Gateway</div>
+            <p class="card-role">Karma/document veri için opsiyonel</p>
+            <ul class="card-sub">
+              <li><strong>Field-level perm</strong> — RBAC entegre</li>
+              <li><strong>DataLoader</strong> — N+1 koruma</li>
+              <li><strong>Persisted query</strong> — production safe</li>
+            </ul>
+            <div class="tag-row"><span class="tag option">COULD</span><span class="tag later">Sprint 4+</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-broadcast"></i> WebSocket / SSE</div>
+            <p class="card-role">Bildirim + agent stream</p>
+            <ul class="card-sub">
+              <li><strong>Notification channel</strong> — toast, alert</li>
+              <li><strong>Agent token stream</strong> — LLM tool-call SSE</li>
+              <li><strong>Live form validation</strong> — server-side check</li>
+              <li><strong>Connection reverse-proxy</strong> — Caddy ws upgrade</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 4: APPLICATION ============ -->
+      <div class="column" data-layer="4">
+        <div class="column-head">
+          <span class="layer-num">4</span>
+          <i class="ph-duotone ph-flow-arrow"></i>
+          <div>
+            <div class="layer-title">Application</div>
+            <div class="layer-cn">Use-case Katmanı</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-rows"></i> Vertical Slice Handlers</div>
+            <p class="card-role">Feature başına dilim — AI üretmesi kolay</p>
+            <ul class="card-sub">
+              <li><strong>Controller + business + view</strong> bir arada</li>
+              <li><strong>Saf use-case fonksiyonu</strong> — framework-free</li>
+              <li><strong>Test edilebilirlik</strong> — pytest fixture'larıyla</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-robot"></i> Agent Runtime</div>
+            <p class="card-role">AI agent yürütme motoru</p>
+            <ul class="card-sub">
+              <li><strong>Tool-calling loop</strong> — XML/JSON tool çağrısı</li>
+              <li><strong>Planning + reflection</strong> — multi-step görev</li>
+              <li><strong>Memory</strong> — kısa (context) + uzun (vector)</li>
+              <li><strong>Human-in-loop</strong> — onay döngüsü UI</li>
+              <li><strong>Cancellation</strong> — kullanıcı durdurabilir</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-graph"></i> ECA Engine</div>
+            <p class="card-role">No-code akış kuralları</p>
+            <ul class="card-sub">
+              <li><strong>Event listener registry</strong> — domain event'lere bağlanır</li>
+              <li><strong>Condition evaluator</strong> — rule DSL (JsonLogic veya custom)</li>
+              <li><strong>Action dispatcher</strong> — başka context çağırır</li>
+              <li><strong>Audit'li</strong> — her tetiklenme log</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-shuffle"></i> Workflow Orchestrator</div>
+            <p class="card-role">Uzun süren async görevler</p>
+            <ul class="card-sub">
+              <li><strong>State machine</strong> — pending → running → done</li>
+              <li><strong>Retry + backoff</strong> — exponential</li>
+              <li><strong>Timeout</strong> — DLQ'ya düşürme</li>
+              <li><strong>Resumable</strong> — kaldığı yerden devam</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 4</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-calendar-check"></i> Job / Queue Dispatcher</div>
+            <p class="card-role">Cron + on-demand iş kuyruğu</p>
+            <ul class="card-sub">
+              <li><strong>Cron entry points</strong> — kayıtlı schedule'lar</li>
+              <li><strong>Priority queue</strong> — yüksek-düşük</li>
+              <li><strong>DLQ</strong> — başarısız iş gözü</li>
+              <li><strong>Worker pool</strong> — VPS'te ayrı process</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 5: DOMAIN ============ -->
+      <div class="column" data-layer="5">
+        <div class="column-head">
+          <span class="layer-num">5</span>
+          <i class="ph-duotone ph-tree-structure"></i>
+          <div>
+            <div class="layer-title">Domain</div>
+            <div class="layer-cn">İş Kuralı — DDD</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-user-circle"></i> Core / IAM</div>
+            <p class="card-role">Auth + kim ne yapabilir</p>
+            <ul class="card-sub">
+              <li><strong>User, Tenant, Role, Permission</strong> — ana varlıklar</li>
+              <li><strong>RBAC + ABAC</strong> — rol + attribute kombinasyon</li>
+              <li><strong>Session, AuthToken</strong> — JWT + refresh</li>
+              <li><strong>OAuth provider hooks</strong> — Google, GitHub, SSO</li>
+              <li><strong>SCIM</strong> — gelecek enterprise provisioning</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 1</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-list-plus"></i> Field / Custom Field API</div>
+            <p class="card-role">Drupal Field / Frappe Custom Field</p>
+            <ul class="card-sub">
+              <li><strong>Runtime alan tanımı</strong> — UI'dan</li>
+              <li><strong>Tip sistemi</strong> — string, number, ref, json</li>
+              <li><strong>Validation</strong> — alan başına kural</li>
+              <li><strong>Migration runner</strong> — JSONB veya ALTER TABLE</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-brackets-curly"></i> Types / Schema Registry</div>
+            <p class="card-role">Tek kaynak şema — DB + API + TS</p>
+            <ul class="card-sub">
+              <li><strong>Schema-first</strong> — YAML veya code-first</li>
+              <li><strong>Code generator</strong> — TS tip + Pydantic + Prisma</li>
+              <li><strong>Versioning</strong> — semver per schema</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-article"></i> Content Context</div>
+            <p class="card-role">Entity + revisions + audit</p>
+            <ul class="card-sub">
+              <li><strong>Doctype tanımları</strong> — Frappe modeli</li>
+              <li><strong>Revisions</strong> — versiyon tut, geri al</li>
+              <li><strong>Taxonomy ağacı</strong> — hierarchical tag</li>
+              <li><strong>Workflow state</strong> — draft / review / published</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-stack-overflow"></i> Layout Context</div>
+            <p class="card-role">Drupal Layout Builder benzeri</p>
+            <ul class="card-sub">
+              <li><strong>Region + section + block</strong> — hiyerarşi</li>
+              <li><strong>Components → Builder</strong> — reusable block</li>
+              <li><strong>Theme override stack</strong> — tenant + brand katmanı</li>
+              <li><strong>Conditional visibility</strong> — rol + tenant + locale</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 4</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-magnifying-glass-plus"></i> Search Context</div>
+            <p class="card-role">Hybrid arama policy'si</p>
+            <ul class="card-sub">
+              <li><strong>Per-entity index policy</strong> — alanlar + ağırlık</li>
+              <li><strong>Faceted query model</strong> — filter agregat</li>
+              <li><strong>Reciprocal Rank Fusion</strong> — BM25 + vector</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-plug"></i> Plugin Context</div>
+            <p class="card-role">Plugin lifecycle yönetimi</p>
+            <ul class="card-sub">
+              <li><strong>Manifest model</strong> — name, version, hooks, perms</li>
+              <li><strong>Lifecycle hooks</strong> — install, enable, disable, uninstall</li>
+              <li><strong>Dependency resolver</strong> — topological install</li>
+              <li><strong>Plugin API stability</strong> — SemVer + deprecation</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 4</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-currency-circle-dollar"></i> Billing Context</div>
+            <p class="card-role">Managed Cloud edition için</p>
+            <ul class="card-sub">
+              <li><strong>Subscription + plan</strong> — Stripe Billing</li>
+              <li><strong>Usage metering</strong> — token, agent run, storage</li>
+              <li><strong>Quota enforcement</strong> — soft + hard limit</li>
+              <li><strong>Invoice + dunning</strong> — overdue akışı</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 6</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 6: AI / AGENTS ============ -->
+      <div class="column" data-layer="6">
+        <div class="column-head">
+          <span class="layer-num">6</span>
+          <i class="ph-duotone ph-brain"></i>
+          <div>
+            <div class="layer-title">AI / Agents</div>
+            <div class="layer-cn">Akıl Katmanı</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-shuffle-simple"></i> Provider Abstraction</div>
+            <p class="card-role">Hexagonal port — model swap ucuz</p>
+            <ul class="card-sub">
+              <li><strong>Anthropic Claude</strong> — birincil</li>
+              <li><strong>OpenAI</strong> — alternatif</li>
+              <li><strong>Ollama / vLLM</strong> — self-host</li>
+              <li><strong>Streaming + retry + timeout</strong></li>
+              <li><strong>Cost tracking</strong> — token sayacı</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-robot"></i> Agent Definitions</div>
+            <p class="card-role">Tenant-aware kayıtlı agentlar</p>
+            <ul class="card-sub">
+              <li><strong>System prompt yönetimi</strong> — versioned</li>
+              <li><strong>Tool registry</strong> — agent'a erişim verilen kapılar</li>
+              <li><strong>Allowed contexts</strong> — whitelist</li>
+              <li><strong>Per-tenant prompt override</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-vector-three"></i> Embedding Pipeline</div>
+            <p class="card-role">Doc → chunk → vector</p>
+            <ul class="card-sub">
+              <li><strong>Chunking</strong> — semantic split + overlap</li>
+              <li><strong>Embed (provider)</strong> — text-embedding</li>
+              <li><strong>Upsert</strong> — pgvector veya Qdrant</li>
+              <li><strong>Reindex cron</strong> — değişen entity</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-magnifying-glass-plus"></i> Hybrid Search Ranker</div>
+            <p class="card-role">BM25 + vector kombinasyonu</p>
+            <ul class="card-sub">
+              <li><strong>Elastic BM25</strong> — keyword skoru</li>
+              <li><strong>pgvector cosine</strong> — semantic skoru</li>
+              <li><strong>RRF fusion</strong> — tek liste döndür</li>
+              <li><strong>Re-ranker (ops.)</strong> — Cohere/Voyage</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-stack"></i> Prompt Library</div>
+            <p class="card-role">Git-backed versiyonlama</p>
+            <ul class="card-sub">
+              <li><strong>Markdown prompt'lar</strong> — repo'da kayıtlı</li>
+              <li><strong>A/B test framework</strong> — variant skor</li>
+              <li><strong>Tenant override</strong> — özel istemler</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 5</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-shield-warning"></i> AI Audit + PII Guard</div>
+            <p class="card-role">Tüm LLM çağrıları kayıtlı</p>
+            <ul class="card-sub">
+              <li><strong>Log entry per call</strong> — input + output + maliyet</li>
+              <li><strong>PII detection</strong> — input mask</li>
+              <li><strong>Output sanitization</strong> — yasaklı içerik kontrol</li>
+              <li><strong>Per-tenant cost dashboard</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 7: TENANT ============ -->
+      <div class="column" data-layer="7">
+        <div class="column-head">
+          <span class="layer-num">7</span>
+          <i class="ph-duotone ph-users-four"></i>
+          <div>
+            <div class="layer-title">Tenant</div>
+            <div class="layer-cn">Multi-Brand White-label</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-arrow-square-out"></i> Tenant Resolver</div>
+            <p class="card-role">Request → tenant_id</p>
+            <ul class="card-sub">
+              <li><strong>Subdomain</strong> — birinci tercih</li>
+              <li><strong>Path-based</strong> — /<tenant>/... fallback</li>
+              <li><strong>Custom domain</strong> — CNAME → tenant</li>
+              <li><strong>Header override</strong> — admin tooling için</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 1</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-palette"></i> Brand Theme Store</div>
+            <p class="card-role">Per-tenant CSS variable seti</p>
+            <ul class="card-sub">
+              <li><strong>Color tokens</strong> — --c-brand-{50..900}</li>
+              <li><strong>Logo + favicon</strong> — asset key</li>
+              <li><strong>Email template</strong> — başlık + logo</li>
+              <li><strong>Dark mode opt-in</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-folder"></i> Asset Isolation</div>
+            <p class="card-role">Veri sızıntısı imkansız</p>
+            <ul class="card-sub">
+              <li><strong>MinIO bucket prefix</strong> — tenant key altında</li>
+              <li><strong>Signed URL TTL</strong> — kısa süre</li>
+              <li><strong>Storage quota</strong> — plan başına</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-rocket-launch"></i> Tenant Provisioning</div>
+            <p class="card-role">Self-service signup workflow</p>
+            <ul class="card-sub">
+              <li><strong>Signup form</strong> — slug + plan seçim</li>
+              <li><strong>Migration runner</strong> — yeni tenant tabloları</li>
+              <li><strong>Welcome email</strong> — onboarding link</li>
+              <li><strong>Tour</strong> — Onboarding plugin tetiklenir</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 2</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-gauge"></i> Plan + Quota Gate</div>
+            <p class="card-role">Feature flag + soft/hard limit</p>
+            <ul class="card-sub">
+              <li><strong>Plan → feature set</strong> — JSON/DB tanımı</li>
+              <li><strong>Counter</strong> — Redis (token, request, storage)</li>
+              <li><strong>Soft limit</strong> — uyarı + grace</li>
+              <li><strong>Hard limit</strong> — 429 + upgrade CTA</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 5</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-arrow-counter-clockwise"></i> Tenant Lifecycle</div>
+            <p class="card-role">Pause / archive / delete</p>
+            <ul class="card-sub">
+              <li><strong>Suspend</strong> — okuma açık, yazma kapalı</li>
+              <li><strong>Archive</strong> — read-only kalır, asset cold</li>
+              <li><strong>Delete (GDPR)</strong> — 30 gün grace + export</li>
+              <li><strong>Backup per tenant</strong> — restore plan</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 6</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 8: PERSISTENCE ============ -->
+      <div class="column" data-layer="8">
+        <div class="column-head">
+          <span class="layer-num">8</span>
+          <i class="ph-duotone ph-database"></i>
+          <div>
+            <div class="layer-title">Persistence</div>
+            <div class="layer-cn">Saklama Katmanı</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-database"></i> PostgreSQL Primary</div>
+            <p class="card-role">Yapısal + JSONB karma</p>
+            <ul class="card-sub">
+              <li><strong>Master + replica</strong> — multi-node ileride</li>
+              <li><strong>JSONB GIN index</strong> — esnek alan sorgu</li>
+              <li><strong>pgvector extension</strong> — embedding column</li>
+              <li><strong>Row-level Security</strong> — tenant_id zorla</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 0</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-file-ts"></i> Prisma ORM</div>
+            <p class="card-role">Schema-first + tip güvencesi</p>
+            <ul class="card-sub">
+              <li><strong>Migration history</strong> — repo'da</li>
+              <li><strong>TS client</strong> — backend trigger</li>
+              <li><strong>Python prisma-client-py</strong> — alternatif</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-files"></i> CouchDB (opsiyonel)</div>
+            <p class="card-role">Sync-friendly document store</p>
+            <ul class="card-sub">
+              <li><strong>Replication</strong> — offline-first için</li>
+              <li><strong>Mobil sync</strong> — RN edisyonu ile</li>
+              <li><strong>Decision deferred</strong> — ihtiyaç doğunca</li>
+            </ul>
+            <div class="tag-row"><span class="tag later">v0.2</span><span class="tag option">SHOULD</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-magnifying-glass-plus"></i> Elasticsearch</div>
+            <p class="card-role">Full-text + facet</p>
+            <ul class="card-sub">
+              <li><strong>Tek node</strong> — Sprint başı</li>
+              <li><strong>Cluster</strong> — K3s migrasyonu sonrası</li>
+              <li><strong>Reindex pipeline</strong> — domain event'leri tüket</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-vector-three"></i> pgvector / Qdrant</div>
+            <p class="card-role">Vector search</p>
+            <ul class="card-sub">
+              <li><strong>pgvector default</strong> — tek DB</li>
+              <li><strong>Qdrant alternatif</strong> — büyük corpus</li>
+              <li><strong>IVFFlat / HNSW index</strong></li>
+              <li><strong>Hybrid query</strong> — filter + k-NN</li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 3</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-cloud"></i> MinIO (S3-uyumlu)</div>
+            <p class="card-role">Object storage</p>
+            <ul class="card-sub">
+              <li><strong>Bucket per tenant</strong> — izolasyon</li>
+              <li><strong>Signed URL</strong> — private asset</li>
+              <li><strong>Lifecycle policy</strong> — eski versiyonları arşivle</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-lightning"></i> Redis</div>
+            <p class="card-role">Cache + rate limit + pubsub</p>
+            <ul class="card-sub">
+              <li><strong>Cache layer</strong> — hot read</li>
+              <li><strong>Rate limit bucket</strong></li>
+              <li><strong>Pub/Sub hafif</strong> — basit notification fan-out</li>
+              <li><strong>NATS</strong> — büyürken yerini alır</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 9: DX / TOOLING ============ -->
+      <div class="column" data-layer="9">
+        <div class="column-head">
+          <span class="layer-num">9</span>
+          <i class="ph-duotone ph-magic-wand"></i>
+          <div>
+            <div class="layer-title">DX &amp; Tooling</div>
+            <div class="layer-cn">Vibecoding Katmanı</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-terminal"></i> CLI Scaffolder (mf)</div>
+            <p class="card-role">Komut satırı jeneratör</p>
+            <ul class="card-sub">
+              <li><strong>mf gen context &lt;ad&gt;</strong> — yeni bounded context</li>
+              <li><strong>mf gen doctype &lt;ad&gt;</strong> — entity + migrasyon</li>
+              <li><strong>mf gen view &lt;ad&gt;</strong> — liste/dashboard</li>
+              <li><strong>mf gen plugin &lt;ad&gt;</strong> — plugin iskeleti</li>
+              <li><strong>mf dev</strong> — hot reload</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 11</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-table"></i> Doctype Designer (UI)</div>
+            <p class="card-role">Tıklayarak entity + alan</p>
+            <ul class="card-sub">
+              <li><strong>Drag & drop alan ekle</strong> — string, ref, json...</li>
+              <li><strong>Migration üretici</strong> — Prisma diff</li>
+              <li><strong>Permission editor</strong> — RBAC inline</li>
+              <li><strong>Önizleme</strong> — örnek kayıt formu</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 11–12</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-eye"></i> View Designer (UI)</div>
+            <p class="card-role">Listing / dashboard no-code</p>
+            <ul class="card-sub">
+              <li><strong>Tablo + filtre + grafik</strong> — drag</li>
+              <li><strong>Drupal Views muadili</strong></li>
+              <li><strong>SQL preview</strong> — power-user için</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-file-code"></i> VS Code Extension</div>
+            <p class="card-role">Schema intellisense</p>
+            <ul class="card-sub">
+              <li><strong>Route navigation</strong> — Cmd+click → handler</li>
+              <li><strong>Plugin wizard</strong> — yeni plugin sihirbazı</li>
+              <li><strong>Snippet picker</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag now">Sprint 12</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-code"></i> Snippet Library</div>
+            <p class="card-role">AI-generated tip-safe kod</p>
+            <ul class="card-sub">
+              <li><strong>Use-case başına</strong> — auth, CRUD, agent tool</li>
+              <li><strong>Inline edit</strong> — params doldur</li>
+              <li><strong>Toplulukça katkı</strong> — repo PR</li>
+            </ul>
+            <div class="tag-row"><span class="tag option">SHOULD</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-book-open"></i> Documentation Site</div>
+            <p class="card-role">MDX + live playground</p>
+            <ul class="card-sub">
+              <li><strong>API reference</strong> — OpenAPI'den auto</li>
+              <li><strong>Tutorial steps</strong> — interactive</li>
+              <li><strong>Search (Algolia DocSearch)</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ LAYER 10: OPS / OBSERVABILITY ============ -->
+      <div class="column" data-layer="10">
+        <div class="column-head">
+          <span class="layer-num">10</span>
+          <i class="ph-duotone ph-pulse"></i>
+          <div>
+            <div class="layer-title">Observability</div>
+            <div class="layer-cn">Ops &amp; Reliability</div>
+          </div>
+        </div>
+        <div class="column-body">
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-list-bullets"></i> Structured Logging</div>
+            <p class="card-role">JSON Lines, request_id korelasyon</p>
+            <ul class="card-sub">
+              <li><strong>stdout → Loki</strong> — single VPS için Grafana stack</li>
+              <li><strong>trace_id + tenant_id</strong> — her satıra zorla</li>
+              <li><strong>Log retention</strong> — 30 gün hot, 1 yıl cold</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span><span class="tag now">Sprint 1</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-archive"></i> Audit Trail</div>
+            <p class="card-role">Değiştirilemez event log</p>
+            <ul class="card-sub">
+              <li><strong>Postgres tablosu</strong> — INSERT only</li>
+              <li><strong>Append-only constraint</strong> — DB-level</li>
+              <li><strong>Forensic query</strong> — kim ne zaman ne yaptı</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-chart-line-up"></i> Metrics</div>
+            <p class="card-role">Prometheus-uyumlu</p>
+            <ul class="card-sub">
+              <li><strong>FastAPI middleware</strong> — req duration histogram</li>
+              <li><strong>DB query timings</strong></li>
+              <li><strong>Agent run + cost</strong> — özel metrik</li>
+              <li><strong>Per-tenant breakdown</strong></li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-graph"></i> Tracing</div>
+            <p class="card-role">OpenTelemetry SDK</p>
+            <ul class="card-sub">
+              <li><strong>Trace ID propagation</strong> — request başına</li>
+              <li><strong>Span enstrümantasyon</strong> — auto + manual</li>
+              <li><strong>Jaeger / Tempo</strong> — collector</li>
+            </ul>
+            <div class="tag-row"><span class="tag option">SHOULD</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-heartbeat"></i> Health &amp; Readiness</div>
+            <p class="card-role">/healthz + /readyz</p>
+            <ul class="card-sub">
+              <li><strong>Dependency check</strong> — DB, Redis, ES, MinIO</li>
+              <li><strong>Liveness vs readiness</strong> — ayrı</li>
+              <li><strong>Uptime monitoring</strong> — UptimeRobot / Healthchecks.io</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-floppy-disk"></i> Backup &amp; DR</div>
+            <p class="card-role">pg_dump + MinIO snapshot</p>
+            <ul class="card-sub">
+              <li><strong>Saatlik WAL</strong> — point-in-time recovery</li>
+              <li><strong>Günlük tam</strong> — ayrı fiziksel disk</li>
+              <li><strong>Off-site backup</strong> — başka cloud</li>
+              <li><strong>DR drill</strong> — 3 ayda bir restore testi</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+          <div class="card">
+            <div class="card-title"><i class="ph-duotone ph-github-logo"></i> CI/CD</div>
+            <p class="card-role">GitHub Actions → Hetzner</p>
+            <ul class="card-sub">
+              <li><strong>Build → test → deploy</strong> — ana pipeline</li>
+              <li><strong>Docker registry (ghcr)</strong> — image kayıt</li>
+              <li><strong>Migration adımı</strong> — deploy öncesi</li>
+              <li><strong>Rollback</strong> — bir önceki image hızlıca</li>
+            </ul>
+            <div class="tag-row"><span class="tag must">MUST</span></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="flow-note">
+    <h3><i class="ph-duotone ph-arrow-right"></i> Request hayat döngüsü — katmanlar boyunca</h3>
+    <p>Eğitim için: bir HTTP isteği aşağıdaki sırayla katmanlardan geçer. Her geçişte hangi sorumluluğun yerine getirildiğini ekibinize açıklayabilirsiniz.</p>
+    <div class="flow-steps">
+      <div class="flow-step"><strong>1. Client</strong><p>Kullanıcı PWA'da form gönderir. Service Worker offline ise IndexedDB'ye kuyruğa alır, sonra retry.</p></div>
+      <div class="flow-step"><strong>2. Edge</strong><p>Caddy TLS terminate. Write Protection JWT + tenant + CSRF doğrular, rate limit kontrol, security header ekler.</p></div>
+      <div class="flow-step"><strong>3. API</strong><p>FastAPI route Pydantic ile validate. OpenAPI'den üretilen tip + RPC SDK aynı kontrak.</p></div>
+      <div class="flow-step"><strong>4. Application</strong><p>Vertical slice handler use-case'i çağırır; gerekirse Agent Runtime tetiklenir (AI tool-call) veya ECA Engine event yayınlar.</p></div>
+      <div class="flow-step"><strong>5. Domain</strong><p>Bounded context içinde iş kuralı uygulanır. Field/Custom Field API doğrulaması yapılır.</p></div>
+      <div class="flow-step"><strong>6. AI</strong><p>Agent gerekirse Provider Abstraction üzerinden LLM çağırır; Hybrid Ranker bağlam getirir; tüm çağrı AI Audit'e düşer.</p></div>
+      <div class="flow-step"><strong>7. Tenant</strong><p>Tenant Resolver tenant_id'yi enjekte eder; Quota Gate plan limitini kontrol eder; brand theme UI'a yayılır.</p></div>
+      <div class="flow-step"><strong>8. Persistence</strong><p>Postgres + Prisma ile yazma; gerekirse Elastic/pgvector reindex event'i Redis pub/sub'a düşer.</p></div>
+      <div class="flow-step"><strong>9. DX</strong><p>CLI/Designer üretilen kod buradan akar. Geliştirme aşamasında — runtime'da yer almaz, geliştirici loop'unun parçası.</p></div>
+      <div class="flow-step"><strong>10. Ops</strong><p>Tüm adımlar log + metric + trace olarak yayılır. Audit Trail yazma işlemlerini immutable kayıtla saklar.</p></div>
+    </div>
+  </div>
+
+  <div class="flow-note">
+    <h3><i class="ph-duotone ph-warning-circle"></i> Anti-pattern uyarıları</h3>
+    <p>Eğitim oturumunda katman ihlali olarak işaretleyin — bunlar gözden kaçırılınca framework çöker.</p>
+    <div class="flow-steps">
+      <div class="flow-step"><strong>Cross-layer leak</strong><p>Domain bounded context bir başkasını doğrudan import etmesin — sadece event veya port üzerinden.</p></div>
+      <div class="flow-step"><strong>Tenant_id atlama</strong><p>Sorgu yazarken WHERE'a tenant_id koymayı unutma. Middleware'den otomatik ekleyen helper kullan, manuel SQL yazma.</p></div>
+      <div class="flow-step"><strong>Plugin core'a sızıntı</strong><p>Plugin core entity'ye doğrudan dokunamaz; sadece ilan ettiği hook + API üzerinden.</p></div>
+      <div class="flow-step"><strong>Senkron AI çağrısı</strong><p>LLM çağrısı request handler içinde bloke etmesin — agent runtime queue'ya at, SSE ile sonucu döndür.</p></div>
+      <div class="flow-step"><strong>Schema değişikliği commit'siz</strong><p>Doctype Designer ile yapılan değişiklik git'e commit'lenmeden tenant tarafına yansımasın.</p></div>
+      <div class="flow-step"><strong>Audit log es geçme</strong><p>Yazma operasyonları audit'siz kabul edilmesin. Yasal compliance + güven için zorunlu.</p></div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
