@@ -1,0 +1,16 @@
+{
+  "name": "condtechstackform",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Meta-Framework Karar Sihirbazı — Koşullu Form → Kanban",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "build": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --minify --sourcemap",
+    "build:dev": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --sourcemap"
+  },
+  "devDependencies": {
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3"
+  }
+}
