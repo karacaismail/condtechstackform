@@ -191,15 +191,34 @@ button, input, label, small, .text-xs, .text-sm, .pill, code { font-size: 1rem !
 }
 .opt {
   background: #fff; border: 1.5px solid var(--c-border);
-  border-radius: var(--radius); padding: .85rem 1rem;
+  border-radius: var(--radius);
   text-align: left; cursor: pointer; font: inherit;
-  display: flex; flex-direction: column; gap: .35rem;
+  display: flex; flex-direction: column;
   transition: all .15s;
+  outline: none;
+  overflow: hidden;
 }
 .opt:hover { border-color: var(--c-primary); transform: translateY(-1px); box-shadow: var(--shadow-2); }
-.opt.selected { background: var(--c-primary-soft); border-color: var(--c-primary); outline: 3px solid rgba(79,70,229,.12); }
+.opt:focus-visible { outline: 3px solid rgba(79,70,229,.35); outline-offset: 2px; }
+.opt.selected { background: var(--c-primary-soft); border-color: var(--c-primary); }
+.opt.selected:hover { transform: translateY(-1px); }
 .opt.opt-custom { border-style: dashed; }
-.opt.opt-custom.selected { border-color: var(--c-bel); background: var(--c-bel-soft); outline-color: rgba(217,119,6,.12); }
+.opt.opt-custom.selected { border-color: var(--c-bel); background: var(--c-bel-soft); }
+.opt-body { padding: .85rem 1rem; display: flex; flex-direction: column; gap: .4rem; flex: 1; }
+.opt-footer {
+  display: flex; align-items: center; justify-content: space-between; gap: .65rem;
+  padding: .55rem .85rem;
+  background: #fafbfc;
+  border-top: 1px solid var(--c-border);
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.opt.selected .opt-footer { background: rgba(79,70,229,.06); border-top-color: rgba(79,70,229,.2); }
+.opt.opt-custom.selected .opt-footer { background: rgba(217,119,6,.08); border-top-color: rgba(217,119,6,.2); }
+.opt-footer-hint { color: var(--c-text-muted); font-weight: var(--fw-light); }
+.opt-select-hint { color: var(--c-text-muted); font-weight: var(--fw-med); font-size: 1rem !important; display: inline-flex; align-items: center; gap: .25rem; }
+.opt.selected .opt-select-hint { color: var(--c-primary); }
+.opt.selected .opt-select-hint i { color: var(--c-success); font-size: 1.15rem; }
 .opt-head { display: flex; justify-content: space-between; gap: .5rem; align-items: baseline; }
 .opt-tech { font-weight: var(--fw-med); }
 .opt-acronym {
@@ -219,13 +238,13 @@ button, input, label, small, .text-xs, .text-sm, .pill, code { font-size: 1rem !
 .pill-pro { background: #ecfdf5; color: var(--c-success); border-color: #a7f3d0; }
 .pill-con { background: #fef2f2; color: #b91c1c; border-color: #fecaca; }
 .opt-details-btn {
-  margin-top: .5rem; align-self: flex-start;
   padding: .35rem .75rem; border-radius: 999px;
   background: #fff; border: 1px solid #c7d2fe; color: var(--c-primary);
   font: inherit; font-weight: var(--fw-med); cursor: pointer;
   display: inline-flex; align-items: center; gap: .35rem;
 }
-.opt-details-btn:hover { background: var(--c-primary-soft); }
+.opt-details-btn:hover { background: var(--c-primary-soft); border-color: var(--c-primary); }
+.opt.selected .opt-details-btn { background: #fff; }
 
 .custom-input {
   margin-top: .85rem;

@@ -202,28 +202,37 @@ function renderOptionCard(q: Question, opt: Option | typeof CUSTOM_OPTION, ans?:
   const hasScenarios = !isCustom && (opt as Option).scenarios && (opt as Option).scenarios!.length > 0;
   const realOpt = opt as Option;
 
+  // Dış element <div role="button"> — nested <button> sorunu yok; içerdeki Detaylar gerçek button.
   return `
-    <button class="opt ${selected} ${isCustom ? "opt-custom" : ""}" data-q="${escape(q.id)}" data-opt="${escape(opt.id)}">
-      <div class="opt-head">
-        <span class="opt-tech">${escape(opt.techLabel)}</span>
-        ${opt.acronym ? `<span class="opt-acronym">${escape(opt.acronym)}</span>` : ""}
+    <div class="opt ${selected} ${isCustom ? "opt-custom" : ""}"
+         role="button" tabindex="0"
+         data-q="${escape(q.id)}" data-opt="${escape(opt.id)}"
+         aria-pressed="${selected ? "true" : "false"}">
+      <div class="opt-body">
+        <div class="opt-head">
+          <span class="opt-tech">${escape(opt.techLabel)}</span>
+          ${opt.acronym ? `<span class="opt-acronym">${escape(opt.acronym)}</span>` : ""}
+        </div>
+        ${opt.acronymExpansion ? `<div class="opt-expansion"><strong>Açılım:</strong> ${escape(opt.acronymExpansion)}</div>` : ""}
+        <div class="opt-tr"><strong>Türkçe:</strong> ${escape(opt.trLabel)}</div>
+        <div class="opt-explain">${escape(opt.trExplanation)}</div>
+        ${realOpt.pros && realOpt.pros.length ? `
+          <div class="opt-pros">
+            <strong>Avantaj:</strong> ${realOpt.pros.map((p) => `<span class="pill pill-pro">${escape(p)}</span>`).join(" ")}
+          </div>` : ""}
+        ${realOpt.cons && realOpt.cons.length ? `
+          <div class="opt-cons">
+            <strong>Dezavantaj:</strong> ${realOpt.cons.map((c) => `<span class="pill pill-con">${escape(c)}</span>`).join(" ")}
+          </div>` : ""}
       </div>
-      ${opt.acronymExpansion ? `<div class="opt-expansion"><strong>Açılım:</strong> ${escape(opt.acronymExpansion)}</div>` : ""}
-      <div class="opt-tr"><strong>Türkçe:</strong> ${escape(opt.trLabel)}</div>
-      <div class="opt-explain">${escape(opt.trExplanation)}</div>
-      ${realOpt.pros && realOpt.pros.length ? `
-        <div class="opt-pros">
-          <strong>Avantaj:</strong> ${realOpt.pros.map((p) => `<span class="pill pill-pro">${escape(p)}</span>`).join(" ")}
-        </div>` : ""}
-      ${realOpt.cons && realOpt.cons.length ? `
-        <div class="opt-cons">
-          <strong>Dezavantaj:</strong> ${realOpt.cons.map((c) => `<span class="pill pill-con">${escape(c)}</span>`).join(" ")}
-        </div>` : ""}
-      ${hasScenarios ? `
-        <button class="opt-details-btn" data-q="${escape(q.id)}" data-opt="${escape(opt.id)}" type="button">
-          <i class="ph ph-magnifying-glass"></i> Detaylar — gerçek dünya senaryoları
-        </button>` : ""}
-    </button>
+      <div class="opt-footer">
+        ${hasScenarios ? `
+          <button class="opt-details-btn" data-q="${escape(q.id)}" data-opt="${escape(opt.id)}" type="button">
+            <i class="ph ph-magnifying-glass"></i> Detaylar — gerçek dünya senaryoları
+          </button>` : `<span class="opt-footer-hint">${isCustom ? "Aşağıya kendi sorunu yaz" : "Bu seçeneği tıklayarak işaretle"}</span>`}
+        <span class="opt-select-hint">${selected ? '<i class="ph-fill ph-check-circle"></i> seçildi' : 'tıkla → işaretle'}</span>
+      </div>
+    </div>
   `;
 }
 
@@ -238,22 +247,32 @@ function renderCustomTextarea(q: Question, ans: AnswerEntry): string {
 }
 
 function attachQuestionHandlers(root: HTMLElement): void {
-  // Option click
-  root.querySelectorAll<HTMLButtonElement>(".opt").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      // Details butonu içeride — onun click'ini ele alalım ayrıca
-      const target = e.target as HTMLElement;
-      if (target.closest(".opt-details-btn")) return;
+  const selectOption = (el: HTMLElement) => {
+    const qid = el.dataset["q"]!;
+    const optId = el.dataset["opt"]!;
+    const q = getQuestion(qid);
+    if (!q) return;
+    const opt = optId === "custom" ? CUSTOM_OPTION : q.options.find((o) => o.id === optId);
+    if (!opt) return;
+    const existing = state.answers.get(qid);
+    const customText = optId === "custom" ? (existing?.customText || "") : null;
+    setAnswer(q, opt, customText);
+  };
 
-      const qid = btn.dataset["q"]!;
-      const optId = btn.dataset["opt"]!;
-      const q = getQuestion(qid);
-      if (!q) return;
-      const opt = optId === "custom" ? CUSTOM_OPTION : q.options.find((o) => o.id === optId);
-      if (!opt) return;
-      const existing = state.answers.get(qid);
-      const customText = optId === "custom" ? (existing?.customText || "") : null;
-      setAnswer(q, opt, customText);
+  // Option click (div role=button)
+  root.querySelectorAll<HTMLDivElement>(".opt").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest(".opt-details-btn")) return; // detaylar butonuna tıklandıysa atla
+      selectOption(el);
+    });
+    el.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        const target = e.target as HTMLElement;
+        if (target.closest(".opt-details-btn")) return;
+        e.preventDefault();
+        selectOption(el);
+      }
     });
   });
 
