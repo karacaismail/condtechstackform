@@ -6,8 +6,10 @@
   "type": "module",
   "scripts": {
     "typecheck": "tsc --noEmit",
-    "build": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --minify --sourcemap",
-    "build:dev": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --sourcemap"
+    "build": "npm run build:app && npm run build:research",
+    "build:app": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --minify --sourcemap",
+    "build:research": "esbuild src/research.ts --bundle --outfile=dist/research.js --format=iife --target=es2020 --minify --sourcemap",
+    "build:dev": "esbuild src/app.ts --bundle --outfile=dist/app.js --format=iife --target=es2020 --sourcemap && esbuild src/research.ts --bundle --outfile=dist/research.js --format=iife --target=es2020 --sourcemap"
   },
   "devDependencies": {
     "esbuild": "^0.24.0",
