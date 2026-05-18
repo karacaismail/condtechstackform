@@ -1,0 +1,1617 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#0f172a">
+  <title>Mimari Sihirbazı v2 — Paradigma & Pattern Derinleştirme</title>
+  <meta name="description" content="FastAPI meta-framework için programlama paradigmaları, sistem mimarisi, dağıtık pattern'ler, DDD, SOLID, GoF, PoEAA, veri mimarisi, test paradigmaları ve operasyon kararları.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/regular/style.css">
+  <link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/fill/style.css">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.5.2/flowbite.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --bg-alt: #f5f5f6;
+      --bg-elevated: #ffffff;
+      --border: #cbd5e1;
+      --border-strong: #475569;
+      --text: #0b1220;
+      --text-secondary: #1f2937;
+      --text-muted: #475569;
+      --accent: #1d4ed8;
+      --accent-hover: #1e3a8a;
+      --accent-on: #ffffff;
+      --warning-bg: #fef3c7;
+      --warning-text: #6b3a00;
+      --warning-border: #b45309;
+      --danger: #991b1b;
+      --success-bg: #dcfce7;
+      --success-text: #14532d;
+      --custom-bg: #fdf2f8;
+      --custom-text: #6b1442;
+      --custom-border: #be185d;
+      --focus: #1d4ed8;
+      --selected-bg: #eff6ff;
+      --selected-border: #1d4ed8;
+      --code-bg: #0f172a;
+      --code-text: #e2e8f0;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0a0a0a;
+        --bg-alt: #161616;
+        --bg-elevated: #1c1c1c;
+        --border: #3f3f46;
+        --border-strong: #a1a1aa;
+        --text: #fafafa;
+        --text-secondary: #e4e4e7;
+        --text-muted: #a1a1aa;
+        --accent: #60a5fa;
+        --accent-hover: #93c5fd;
+        --accent-on: #0a0a0a;
+        --warning-bg: #422006;
+        --warning-text: #fde68a;
+        --warning-border: #f59e0b;
+        --success-bg: #052e16;
+        --success-text: #86efac;
+        --custom-bg: #500724;
+        --custom-text: #fbcfe8;
+        --custom-border: #f472b6;
+        --focus: #93c5fd;
+        --selected-bg: #1e3a8a;
+        --selected-border: #93c5fd;
+        --code-bg: #020617;
+        --code-text: #e2e8f0;
+      }
+    }
+
+    * { box-sizing: border-box; }
+    html { font-size: 16px; scroll-behavior: smooth; }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+    body {
+      margin: 0;
+      font-family: 'Roboto', system-ui, -apple-system, sans-serif;
+      font-weight: 400;
+      font-size: 1rem;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .skip-link {
+      position: absolute;
+      top: -100px; left: 8px;
+      background: var(--accent);
+      color: var(--accent-on);
+      padding: 12px 24px;
+      font-weight: 500;
+      text-decoration: none;
+      z-index: 1000;
+      border-radius: 0 0 8px 8px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+    }
+    .skip-link:focus { top: 0; }
+
+    *:focus-visible {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+      border-radius: 4px;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 280px minmax(0, 1fr) 400px;
+      min-height: 100vh;
+    }
+    @media (max-width: 1280px) { .app { grid-template-columns: 240px minmax(0, 1fr); } .panel-export { display: none; } .panel-toggle { display: inline-flex !important; } }
+    @media (max-width: 820px)  { .app { grid-template-columns: 1fr; } .nav-sidebar { display: none; } .nav-toggle { display: inline-flex !important; } }
+
+    .nav-sidebar {
+      background: var(--bg-alt);
+      border-right: 1px solid var(--border);
+      padding: 24px 0 80px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+    }
+    .nav-sidebar h2 {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0 24px 12px;
+    }
+    .nav-list { list-style: none; padding: 0; margin: 0; }
+    .nav-list a {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      font-size: 0.9375rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-left: 3px solid transparent;
+      min-height: 44px;
+    }
+    .nav-list a:hover { background: var(--bg-elevated); color: var(--text); }
+    .nav-list a[aria-current="true"] { background: var(--selected-bg); color: var(--text); border-left-color: var(--accent); font-weight: 500; }
+    .nav-list i { font-size: 18px; flex-shrink: 0; }
+    .nav-list span.label { flex: 1; min-width: 0; }
+    .nav-badge {
+      font-size: 0.75rem;
+      background: var(--border);
+      color: var(--text-secondary);
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-weight: 500;
+      min-width: 32px;
+      text-align: center;
+    }
+    .nav-list a.has-answers .nav-badge { background: var(--success-bg); color: var(--success-text); }
+    .nav-list a.has-belirsiz .nav-badge { background: var(--warning-bg); color: var(--warning-text); border: 1px solid var(--warning-border); }
+
+    main { padding: 32px clamp(20px, 4vw, 56px) 120px; max-width: 100%; }
+
+    .header-bar {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 16px;
+      padding-bottom: 16px;
+      margin-bottom: 8px;
+    }
+    .header-bar h1 {
+      font-size: clamp(1.5rem, 3vw, 2rem);
+      font-weight: 500;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .header-bar p { margin: 6px 0 0; color: var(--text-muted); font-size: 1rem; max-width: 56ch; }
+    .progress-meter {
+      font-size: 0.9375rem;
+      font-weight: 500;
+      padding: 10px 16px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 6px;
+      background: var(--bg-alt);
+      border-radius: 999px;
+      overflow: hidden;
+      margin: 16px 0 32px;
+    }
+    .progress-bar > div { height: 100%; background: var(--accent); transition: width 0.3s; border-radius: 999px; }
+
+    .panel-toggle, .nav-toggle {
+      display: none;
+      position: fixed;
+      bottom: 24px;
+      z-index: 50;
+      min-height: 56px;
+      min-width: 56px;
+      padding: 14px 20px;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--accent-on);
+      border: 0;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+      align-items: center;
+      gap: 8px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+    }
+    .panel-toggle { right: 24px; }
+    .nav-toggle { left: 24px; }
+    .nav-toggle i, .panel-toggle i { font-size: 22px; }
+
+    .category {
+      margin-bottom: 64px;
+      scroll-margin-top: 24px;
+    }
+    .category-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding-bottom: 14px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    .category-icon {
+      width: 48px; height: 48px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+    .category-title { font-size: 1.5rem; font-weight: 500; margin: 0; letter-spacing: -0.01em; }
+    .category-subtitle { font-size: 0.9375rem; color: var(--text-muted); margin: 4px 0 0; max-width: 60ch; }
+
+    .question {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 16px;
+    }
+    .question[hidden] { display: none !important; }
+    .question-header { margin-bottom: 14px; }
+    .question-title {
+      font-size: 1.0625rem;
+      font-weight: 500;
+      margin: 0 0 8px;
+      line-height: 1.5;
+    }
+    .question-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 4px; }
+    .question-purpose {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin: 0;
+      padding-left: 22px;
+      position: relative;
+      flex: 1;
+      min-width: 240px;
+    }
+    .question-purpose::before {
+      content: "\f3eb";
+      font-family: "Phosphor";
+      position: absolute;
+      left: 0;
+      top: 1px;
+      color: var(--accent);
+      font-size: 16px;
+    }
+    .question-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--accent);
+      background: var(--selected-bg);
+      padding: 3px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--selected-border);
+    }
+    .question-tag.cond { color: var(--warning-text); background: var(--warning-bg); border-color: var(--warning-border); }
+
+    .options { display: grid; gap: 10px; margin-top: 4px; border: 0; padding: 0; }
+
+    .option {
+      display: block;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 18px;
+      background: var(--bg);
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      min-height: 44px;
+    }
+    .option:hover { border-color: var(--border-strong); background: var(--bg-alt); }
+    .option:has(input:checked) {
+      border-color: var(--selected-border);
+      background: var(--selected-bg);
+      border-width: 2px;
+      padding: 15px 17px;
+    }
+    .option:focus-within {
+      outline: 3px solid var(--focus);
+      outline-offset: 2px;
+    }
+    .option-row { display: flex; align-items: flex-start; gap: 14px; }
+    .option input[type=radio], .option input[type=checkbox] {
+      margin-top: 4px;
+      width: 22px; height: 22px;
+      flex-shrink: 0;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+    .option-body { flex: 1; min-width: 0; }
+    .option-technical {
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text);
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .option-acronym { font-size: 0.8125rem; color: var(--text-muted); font-weight: 400; }
+    .option-turkish { font-size: 0.875rem; color: var(--text-secondary); margin-top: 4px; font-style: italic; }
+    .option-explanation { font-size: 0.9375rem; color: var(--text-secondary); margin-top: 10px; line-height: 1.6; }
+
+    .option.option-custom { background: var(--custom-bg); border-style: dashed; border-color: var(--custom-border); }
+    .option.option-custom .option-technical { color: var(--custom-text); }
+    .option.option-custom .option-turkish { color: var(--custom-text); }
+    .option.option-preset { background: linear-gradient(0deg, var(--bg-alt), var(--bg-alt)), var(--bg); border-color: var(--custom-border); }
+    .auto-badge { display: inline-flex; align-items: center; gap: 4px; font-size: 0.6875rem; font-weight: 700; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 999px; background: var(--custom-bg); color: var(--custom-text); border: 1px solid var(--custom-border); text-transform: uppercase; }
+    .auto-badge i { font-size: 11px; }
+
+    details.option-details {
+      margin-top: 12px;
+      padding: 0;
+      background: transparent;
+      border: 0;
+    }
+    details.option-details summary {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--accent);
+      cursor: pointer;
+      padding: 8px 14px;
+      border-radius: 6px;
+      list-style: none;
+      min-height: 36px;
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+    }
+    details.option-details summary:hover { border-color: var(--accent); }
+    details.option-details summary::-webkit-details-marker { display: none; }
+    details.option-details summary::after { content: "\f0d7"; font-family: "Phosphor"; transition: transform 0.2s; font-size: 14px; }
+    details.option-details[open] summary::after { transform: rotate(180deg); }
+    details.option-details[open] summary { margin-bottom: 12px; }
+    .scenario {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 16px 20px;
+      font-size: 0.9375rem;
+      line-height: 1.7;
+    }
+    .scenario h5 {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin: 14px 0 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .scenario h5:first-child { margin-top: 0; }
+    .scenario p { margin: 6px 0; color: var(--text-secondary); }
+    .scenario ul { padding-left: 1.3rem; margin: 6px 0; }
+    .scenario li { margin: 4px 0; color: var(--text-secondary); }
+    .scenario strong { color: var(--text); font-weight: 500; }
+    .scenario em {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      padding: 1px 6px;
+      border-radius: 4px;
+      font-style: normal;
+      font-size: 0.875rem;
+    }
+    .scenario code { background: var(--code-bg); color: var(--code-text); padding: 2px 8px; border-radius: 4px; font-family: ui-monospace, Menlo, monospace; font-size: 0.8125rem; }
+
+    .custom-input-panel {
+      margin-top: 14px;
+      padding: 18px;
+      background: var(--custom-bg);
+      border: 1px solid var(--custom-border);
+      border-radius: 10px;
+    }
+    .custom-input-panel label {
+      display: block;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      color: var(--custom-text);
+      margin-bottom: 10px;
+    }
+    .custom-input-panel textarea {
+      width: 100%;
+      min-height: 84px;
+      padding: 12px;
+      border: 1px solid var(--border-strong);
+      border-radius: 8px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: inherit;
+      font-size: 1rem;
+      line-height: 1.6;
+      resize: vertical;
+    }
+    .belirsiz-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      padding: 5px 12px;
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-border);
+      border-radius: 999px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+
+    .panel-export {
+      background: var(--bg-alt);
+      border-left: 1px solid var(--border);
+      padding: 24px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .panel-export h2 {
+      font-size: 0.8125rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      margin: 0;
+    }
+    .panel-export .intro { font-size: 0.875rem; color: var(--text-muted); margin: 8px 0 0; line-height: 1.6; }
+    .panel-actions { display: flex; flex-direction: column; gap: 8px; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      cursor: pointer;
+      min-height: 44px;
+      border: 1px solid transparent;
+      transition: background 0.15s, border-color 0.15s;
+      text-align: center;
+    }
+    .btn-primary { background: var(--accent); color: var(--accent-on); border-color: var(--accent); }
+    .btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-secondary { background: var(--bg); color: var(--text); border-color: var(--border); }
+    .btn-secondary:hover { background: var(--bg-elevated); border-color: var(--border-strong); }
+    .btn-warning { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+    .btn-warning:hover { background: var(--warning-border); color: var(--bg); }
+    .btn i { font-size: 18px; }
+
+    .json-preview {
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 16px;
+      border-radius: 8px;
+      font-family: ui-monospace, 'SF Mono', Menlo, monospace;
+      font-size: 0.8125rem;
+      line-height: 1.55;
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 360px;
+      overflow-y: auto;
+      border: 1px solid var(--border-strong);
+    }
+
+    .belirsiz-list {
+      background: var(--warning-bg);
+      color: var(--warning-text);
+      border: 1px solid var(--warning-border);
+      border-radius: 8px;
+      padding: 14px 16px;
+    }
+    .belirsiz-list h3 { font-size: 0.9375rem; font-weight: 500; margin: 0 0 10px; display: flex; align-items: center; gap: 8px; }
+    .belirsiz-list ul { margin: 0; padding-left: 1.3rem; font-size: 0.875rem; line-height: 1.6; }
+    .belirsiz-list li { margin: 6px 0; }
+    .belirsiz-list:empty { display: none; }
+
+    .sr-only {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden;
+      clip: rect(0,0,0,0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--text);
+      color: var(--bg);
+      padding: 14px 24px;
+      border-radius: 8px;
+      font-size: 0.9375rem;
+      font-weight: 500;
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      min-height: 44px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+    }
+    .toast.visible { opacity: 1; transform: translateX(-50%) translateY(-4px); }
+
+    .drawer {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      display: none;
+      align-items: stretch;
+    }
+    .drawer.open { display: flex; }
+    .drawer-content {
+      background: var(--bg);
+      width: min(420px, 90vw);
+      height: 100%;
+      overflow-y: auto;
+      padding: 24px;
+      margin-left: auto;
+    }
+    .drawer-content.left { margin-left: 0; margin-right: auto; }
+    .drawer-close {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 16px;
+      min-height: 44px;
+      font-family: inherit;
+      cursor: pointer;
+      color: var(--text);
+      margin-bottom: 16px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+  </style>
+</head>
+<body>
+  <a href="#main" class="skip-link">Ana içeriğe atla</a>
+
+  <div class="app">
+    <nav class="nav-sidebar" aria-label="Kategori navigasyonu">
+      <h2>Kategoriler</h2>
+      <ul class="nav-list" id="nav-list"></ul>
+    </nav>
+
+    <main id="main" tabindex="-1">
+      <div class="header-bar">
+        <div>
+          <h1>Mimari Sihirbazı v2 — Paradigma & Pattern</h1>
+          <p>FastAPI meta-framework için: programlama paradigmaları, sistem mimarisi, dağıtık pattern'ler, DDD, SOLID, GoF, PoEAA, veri mimarisi, test ve operasyon. <strong>Mor "AUTO" rozetli seçenekler önceki kararlarınızla otomatik işaretli geldi</strong> — çıkartabilirsiniz. Rozeti olmayanları siz seçeceksiniz.</p>
+          <details style="margin-top:10px;font-size:0.875rem;color:var(--text-muted)"><summary style="cursor:pointer;font-weight:500;color:var(--accent);">v1 seçimleri özeti (önceki cevaplarınız)</summary>
+            <div style="margin-top:10px;line-height:1.7">
+              <strong>Backend:</strong> Python+FastAPI · Modüler monolit · Postgres+SQLAlchemy · Redis · RabbitMQ+Celery · SSE+WS+REST<br>
+              <strong>Frontend:</strong> React+Vite (headless, admin_pages + front_pages) · React Native · shadcn+Flowbite · Tailwind+TS · TipTap<br>
+              <strong>Hosting:</strong> Hetzner+AWS · Frankfurt/Helsinki/TR · Docker Swarm · Nginx · Cloudflare (CDN/R2/Images/Stream)<br>
+              <strong>İzleme:</strong> ELK · Sentry · OTel+Tempo+Grafana · BetterUptime · Telegram/Email/PagerDuty/SMS<br>
+              <strong>Ölçek/Felaket:</strong> 10-100k kullanıcı · RPO=0 · RTO=15dk · Multi-region active-active · PITR · KVKK+GDPR<br>
+              <strong>AI:</strong> Claude+OpenAI+Gemini+Ollama · Voyage embedding · Qdrant · Elastic · Chatbot/etiketleme/içerik/görsel/çeviri<br>
+              <strong>Ödeme:</strong> iyzico+Stripe+BKM · PayPal · TL+USD+EUR · Paraşüt · Mailgun EU · Twilio · FCM · Chatwoot · MapTiler · PostHog
+            </div>
+          </details>
+        </div>
+        <div class="progress-meter" aria-live="polite">
+          <i class="ph ph-list-checks" aria-hidden="true"></i>
+          <span id="progress-text">0 / 0 cevaplandı</span>
+        </div>
+      </div>
+      <div class="progress-bar" aria-hidden="true"><div id="progress-fill" style="width: 0%"></div></div>
+
+      <div id="categories"></div>
+    </main>
+
+    <aside class="panel-export" aria-label="JSON çıktı paneli" id="panel-export">
+      <div>
+        <h2>JSON Çıktı</h2>
+        <p class="intro">Cevaplarınız anlık olarak buraya yazılır. Sohbete getirin, "belirsiz" işaretli olanları birlikte araştıralım.</p>
+      </div>
+      <div class="panel-actions">
+        <button class="btn btn-primary" id="copy-json" type="button">
+          <i class="ph ph-clipboard-text" aria-hidden="true"></i>
+          JSON kopyala
+        </button>
+        <button class="btn btn-secondary" id="download-json" type="button">
+          <i class="ph ph-download-simple" aria-hidden="true"></i>
+          .json dosyası indir
+        </button>
+        <button class="btn btn-warning" id="copy-prompt" type="button">
+          <i class="ph ph-magic-wand" aria-hidden="true"></i>
+          "Belirsizleri araştır" promptu
+        </button>
+        <button class="btn btn-warning" id="copy-waterfall" type="button">
+          <i class="ph ph-magnifying-glass-plus" aria-hidden="true"></i>
+          "Waterfall ek araştır" promptu
+        </button>
+        <button class="btn btn-secondary" id="reset" type="button">
+          <i class="ph ph-arrow-counter-clockwise" aria-hidden="true"></i>
+          Cevapları sıfırla
+        </button>
+      </div>
+      <div class="belirsiz-list" id="belirsiz-list" aria-live="polite"></div>
+      <div>
+        <h2>Önizleme</h2>
+        <pre class="json-preview" id="json-preview" aria-label="JSON önizleme">{}</pre>
+      </div>
+    </aside>
+  </div>
+
+  <button class="nav-toggle" id="nav-toggle" type="button" aria-label="Kategori menüsünü aç">
+    <i class="ph ph-list" aria-hidden="true"></i> Kategoriler
+  </button>
+  <button class="panel-toggle" id="panel-toggle" type="button" aria-label="JSON panelini aç">
+    <i class="ph ph-code" aria-hidden="true"></i> JSON
+  </button>
+
+  <div class="drawer" id="drawer-nav" role="dialog" aria-label="Kategori navigasyonu" aria-modal="true">
+    <div class="drawer-content left">
+      <button class="drawer-close" data-close-drawer="drawer-nav"><i class="ph ph-x" aria-hidden="true"></i> Kapat</button>
+      <div id="drawer-nav-body"></div>
+    </div>
+  </div>
+  <div class="drawer" id="drawer-export" role="dialog" aria-label="JSON çıktı paneli" aria-modal="true">
+    <div class="drawer-content">
+      <button class="drawer-close" data-close-drawer="drawer-export"><i class="ph ph-x" aria-hidden="true"></i> Kapat</button>
+      <div id="drawer-export-body"></div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    /* ==========================================================
+       MIMARI SIHIRBAZI — Veri ve render motoru
+       Vibecoding uyumlu: tek dosya, JS, build adımı yok.
+       Soru veri yapısı (TS tarzı yorum):
+         { id, title, subtitle, icon, iconBg, iconColor,
+           questions: [{
+             id, title, purpose, multiSelect, condition,
+             options: [{ id, technical, acronym, turkish, explanation, scenario }]
+           }] }
+       ========================================================== */
+
+    const CATEGORIES = [];
+
+    /* === 1 — PROGRAMLAMA PARADIGMALARI === */
+    CATEGORIES.push({
+      id: 'paradigma',
+      title: 'Programlama Paradigmaları',
+      subtitle: 'Kod yazma ve hesaplama modeli. Meta-framework için temel zihinsel iskelet.',
+      icon: 'ph ph-brain',
+      iconBg: '#E1F5EE', iconColor: '#0F6E56',
+      questions: [{
+        id: 'paradigma_secim',
+        title: 'Kullanılacak programlama paradigmaları (birden fazla)?',
+        purpose: 'Meta-framework için hangi paradigmalar zihni şekillendirecek; ekibin yazacağı kodun ortak dili olacak.',
+        multiSelect: true,
+        options: [
+          { id: 'imperative_procedural', preset: true, technical: 'Imperative / Procedural', acronym: 'Adım adım talimat',
+            turkish: 'Talimatlı / prosedürel programlama',
+            explanation: 'Python\'ın doğal yazım tarzı: değişken ata, döngü kur, durumu değiştir.',
+            scenario: '<h5>Senaryo · Python kodu</h5><p>FastAPI endpoint içinde <code>for row in rows: total += row.price</code>. <strong>Kesin:</strong> Python yazıyorsanız zaten her gün procedural yazıyorsunuz.</p>' },
+          { id: 'object_oriented', preset: true, technical: 'Object-Oriented', acronym: 'OOP — Object-Oriented Programming',
+            turkish: 'Nesne yönelimli programlama',
+            explanation: 'Sınıflar, encapsulation, inheritance, polymorphism.',
+            scenario: '<h5>Senaryo · Pydantic + SQLAlchemy</h5><p>Her model bir <code>class User(BaseModel)</code>. <strong>Kesin:</strong> Pydantic ve SQLAlchemy OOP zorunlu.</p>' },
+          { id: 'declarative', preset: true, technical: 'Declarative', acronym: 'Bildirimsel programlama',
+            turkish: 'Ne istediğini söyle, nasılını sisteme bırak',
+            explanation: 'SQL, Pydantic şema tanımları, FastAPI dependency injection.',
+            scenario: '<h5>Senaryo · SQL ve Pydantic</h5><p><code>SELECT ... WHERE ...</code> ya da <code>class UserCreate(BaseModel): email: EmailStr</code>. <strong>Kesin:</strong> Bu yapılar zaten kullanılıyor.</p>' },
+          { id: 'event_driven', preset: true, technical: 'Event-Driven', acronym: 'Olay tetikli programlama',
+            turkish: 'Olay üretimi/tüketimi ile akış kontrolü',
+            explanation: 'RabbitMQ, WebSocket, SSE olay tabanlı iletişim.',
+            scenario: '<h5>Senaryo · RabbitMQ + Celery + WS</h5><p>"Kullanıcı kayıt oldu" olayı → e-mail Celery task → WebSocket\'e push. <strong>Kesin:</strong> RabbitMQ + WS + SSE seçildi, EDA otomatik.</p>' },
+          { id: 'metaprogramming', preset: true, technical: 'Metaprogramming', acronym: 'Kod üreten kod',
+            turkish: 'Çalışma zamanı / build zamanında kod üretimi',
+            explanation: 'Decorator, descriptor, base class, registry. Meta-framework\'ün özüdür.',
+            scenario: '<h5>Senaryo · Meta-framework çekirdeği</h5><p>@route decorator, plugin registry, attribute introspection. <strong>Kesin:</strong> "meta-framework" tanımı gereği zorunlu.</p>' },
+          { id: 'concurrent_parallel', preset: true, technical: 'Concurrent / Parallel', acronym: 'Eşzamanlı / paralel yürütme',
+            turkish: 'Eşzamanlı ve paralel hesaplama',
+            explanation: 'async/await, asyncio, Celery worker, gevent.',
+            scenario: '<h5>Senaryo · FastAPI async</h5><p>I/O bağlı işler asyncio, CPU bağlı işler Celery worker process. <strong>Kesin:</strong> FastAPI + Celery seçildi.</p>' },
+          { id: 'functional', technical: 'Functional', acronym: 'FP — Functional Programming',
+            turkish: 'Saf fonksiyonlar, immutability',
+            explanation: 'Python\'da map/filter/reduce, returns-pure-data fonksiyonlar.',
+            scenario: '<h5>Senaryo · Veri dönüşüm hattı</h5><p>Pydantic immutable model + functools/itertools. Yan etki yok, test çok kolay.</p>' },
+          { id: 'reactive', technical: 'Reactive', acronym: 'RxPy / Signals',
+            turkish: 'Veri akışı ve değişim yayılımı',
+            explanation: 'RxPY, signal/slot, value streams. SSE/WS\'den farklı: programlama modeli.',
+            scenario: '<h5>Senaryo · UI veri akışı</h5><p>Frontend\'de Signals (Preact/SolidJS), backend\'de RxPY. SSE ile karıştırılmamalı.</p>' },
+          { id: 'aspect_oriented', technical: 'Aspect-Oriented', acronym: 'AOP — Aspect-Oriented Programming',
+            turkish: 'Kesişen sorumlulukları ayrı modüllere ayırma',
+            explanation: 'Logging, auth, audit, caching ortak davranışları kod kalabalığı yapmadan uygulamak.',
+            scenario: '<h5>Senaryo · Meta-framework decorator katmanı</h5><p>@audit, @cache, @auth decorator\'ları tüm endpoint\'lere otomatik uygulanır. Meta-framework için doğal eşleşme.</p>' },
+          { id: 'actor_model', technical: 'Actor Model', acronym: 'Aktör Modeli',
+            turkish: 'İzole aktörler arası mesajlaşma',
+            explanation: 'Erlang/Akka tarzı. Python\'da Pykka, Thespian.',
+            scenario: '<h5>Senaryo · Celery aktör benzeri</h5><p>Tam aktör değil ama mesaj tabanlı çalışan paradigma. Pure aktör için Pykka düşünülebilir.</p>' },
+          { id: 'dataflow', technical: 'Dataflow', acronym: 'Veri akışı programlama',
+            turkish: 'Veri akışının tetiklediği hesaplama',
+            explanation: 'Apache Beam, Luigi, Prefect, Airflow. ETL/ELT yapacaksanız.',
+            scenario: '<h5>Senaryo · Analytics pipeline</h5><p>Postgres → Spark/Beam → Lakehouse. Eğer data warehouse/lakehouse yapacaksanız relevant.</p>' },
+          { id: 'logic', technical: 'Logic Programming', acronym: 'Mantık programlama',
+            turkish: 'Olgular ve kurallar üzerinden çıkarım',
+            explanation: 'Prolog, Datalog. İş kuralı motorları (Drools tarzı).',
+            scenario: '<h5>Senaryo · Karmaşık iş kuralı motoru</h5><p>"İndirim X tarihler arası, müşteri Y grupta, sepet > Z TL" gibi kuralları kodlamak yerine bildirimsel tanım. PyDatalog.</p>' },
+          { id: 'array_programming', technical: 'Array Programming', acronym: 'NumPy/Pandas tarzı',
+            turkish: 'Diziye toptan operasyonlar',
+            explanation: 'NumPy, Pandas vectorized işlemler.',
+            scenario: '<h5>Senaryo · Veri analitiği / ML</h5><p>Eğer veri bilimi/ML modülü olacaksa kesin gerekli. Sadece CRUD için gereksiz.</p>' },
+          { id: 'stack_based', technical: 'Stack-based', acronym: 'Forth/PostScript',
+            turkish: 'Yığıt makinesi temelli',
+            explanation: 'Forth, PostScript. Çoğu modern Python projesinde irrelevant.',
+            scenario: '<h5>Senaryo · İrrelevant</h5><p>Python ekosistemine uymaz; PDF/PostScript üretimi gibi özel ihtiyaç dışında geçersiz.</p>' },
+          { id: 'prototype_based', technical: 'Prototype-based', acronym: 'JavaScript kökü',
+            turkish: 'Sınıf yerine prototip klonlama',
+            explanation: 'JavaScript\'in çekirdek modeli. Frontend tarafı için bilgi.',
+            scenario: '<h5>Senaryo · Frontend bilgi seviyesi</h5><p>Python tarafında uygulanmaz. JS ekibi için tanımak iyi.</p>' },
+          { id: 'symbolic', technical: 'Symbolic', acronym: 'Sembolik manipülasyon',
+            turkish: 'Lisp/Scheme tarzı sembol işleme',
+            explanation: 'Karmaşık DSL, sembolik AI, expert system için.',
+            scenario: '<h5>Senaryo · DSL yorumlayıcı</h5><p>Meta-framework içinde özel sorgu dili yazacaksanız (örn. arama DSL\'i) relevant.</p>' }
+        ]
+      }]
+    });
+
+    /* === 2 — SISTEM DÜZEYI MIMARI === */
+    CATEGORIES.push({
+      id: 'sistem_mimari',
+      title: 'Sistem Düzeyi Mimari Stilleri',
+      subtitle: 'Sistemin makro yapısı; deployment ve scope sınırları.',
+      icon: 'ph ph-stack',
+      iconBg: '#EEEDFE', iconColor: '#3C3489',
+      questions: [{
+        id: 'sistem_stil',
+        title: 'Hangi sistem düzeyi mimari stiller (birden fazla)?',
+        purpose: 'Mimari evrim yolu: bugün modüler monolit, yarın hücresel/microservice. Hangi yöne hazır olunduğunu belirler.',
+        multiSelect: true,
+        options: [
+          { id: 'modular_monolith', preset: true, technical: 'Modular Monolith', acronym: 'Modüler Monolit',
+            turkish: 'Tek deploy, iç modül sınırları',
+            explanation: 'Önceki kararla uyumlu, microservice geçişine zemin.',
+            scenario: '<h5>Senaryo · FastAPI modüller</h5><p>app/identity, app/billing, app/marketplace gibi modüller, sıkı sınırlarla. <strong>Kesin:</strong> önceki seçim.</p>' },
+          { id: 'eda', preset: true, technical: 'Event-Driven Architecture', acronym: 'EDA',
+            turkish: 'Olay tetikli sistem mimarisi',
+            explanation: 'Bileşenler olaylarla gevşek bağlı, RabbitMQ + WebSocket + SSE.',
+            scenario: '<h5>Senaryo · Olay omurgası</h5><p>RabbitMQ üzerinden domain event\'ler tüm modüllere yayılır. <strong>Kesin:</strong> RabbitMQ + WS + SSE seçildi.</p>' },
+          { id: 'microkernel_plugin', technical: 'Microkernel / Plugin', acronym: 'Çekirdek + eklentiler',
+            turkish: 'Plugin tabanlı mimari',
+            explanation: 'Meta-framework için doğal seçim — çekirdek + 3. parti plugin\'ler.',
+            scenario: '<h5>Senaryo · Meta-framework eklenti sistemi</h5><p>VSCode, Eclipse, Django app tarzı plugin discovery. Meta-framework\'ün ruhuyla örtüşür.</p>' },
+          { id: 'microservices', technical: 'Microservices', acronym: 'Mikroservisler',
+            turkish: 'Bağımsız deploy küçük servisler',
+            explanation: 'Modüler monolitten doğal evrim. Şu an erken, gelecek için seçenek.',
+            scenario: '<h5>Senaryo · 2-3 yıl sonra</h5><p>Identity, billing, search modülleri ayrı servis. Karmaşıklık artar; ekip büyüklüğü gerekir.</p>' },
+          { id: 'service_based_architecture', technical: 'Service-Based Architecture', acronym: 'SBA',
+            turkish: 'Mikroservis-monolit arası',
+            explanation: 'Daha az ama büyük servisler, paylaşılan DB.',
+            scenario: '<h5>Senaryo · Pragmatik orta yol</h5><p>Tüm modülleri ayırmadan, 3-4 deploy birimi.</p>' },
+          { id: 'serverless_faas', technical: 'Serverless / FaaS', acronym: 'Function as a Service',
+            turkish: 'Sunucusuz, fonksiyon birimleri',
+            explanation: 'AWS Lambda, Cloudflare Workers. AWS seçildi, yan parçalar için olabilir.',
+            scenario: '<h5>Senaryo · Görsel işleme</h5><p>R2\'ye upload sonrası Lambda ile thumbnail. Ana sistem değil, yan akış.</p>' },
+          { id: 'cell_based', technical: 'Cell-Based', acronym: 'Hücresel mimari',
+            turkish: 'Bağımsız ölçeklenen hücreler',
+            explanation: 'AWS Cell pattern — hücre içi hata izole.',
+            scenario: '<h5>Senaryo · Hyperscale + multi-region</h5><p>Çoklu lokasyon active-active + sıfır kayıp seçildi → hücresel desteklenir.</p>' },
+          { id: 'lambda_architecture', technical: 'Lambda Architecture', acronym: 'Lambda Architecture',
+            turkish: 'Batch + stream katmanları',
+            explanation: 'Geçmiş analitik (batch) + canlı stream birlikte.',
+            scenario: '<h5>Senaryo · Analytics ihtiyacı</h5><p>Lakehouse + Kafka kombinasyonu. Eğer veri analitiği önemliyse.</p>' },
+          { id: 'kappa_architecture', technical: 'Kappa Architecture', acronym: 'Kappa Architecture',
+            turkish: 'Sadece stream',
+            explanation: 'Tüm veri akışı stream üzerinden, batch yok.',
+            scenario: '<h5>Senaryo · Saf real-time</h5><p>Olay sourcing ile birlikte. Lambda\'dan basit ama her use case için uygun değil.</p>' },
+          { id: 'layered_n_tier', technical: 'Layered / N-Tier', acronym: 'Katmanlı mimari',
+            turkish: 'Presentation/Business/Data katmanları',
+            explanation: 'Klasik kurumsal yaklaşım.',
+            scenario: '<h5>Senaryo · Modüler monolit içinde</h5><p>Her modül kendi katmanlarına ayrılır. Klasik ve sade.</p>' },
+          { id: 'client_server', technical: 'Client-Server', acronym: 'İstemci-sunucu',
+            turkish: 'İstemci-sunucu modeli',
+            explanation: 'Frontend↔Backend zaten bu modeldedir.',
+            scenario: '<h5>Senaryo · Headless API + admin/front SPA</h5><p>Doğal sonuç. Belirgin tercih değil.</p>' },
+          { id: 'pipe_and_filter', technical: 'Pipe and Filter', acronym: 'Boru-filtre',
+            turkish: 'Veri sırayla işleyen filtreler',
+            explanation: 'Unix pipe felsefesi.',
+            scenario: '<h5>Senaryo · ETL pipeline</h5><p>Stream\'de step-by-step transformation.</p>' },
+          { id: 'broker', technical: 'Broker', acronym: 'Aracı katmanı',
+            turkish: 'Bileşenler arası aracı',
+            explanation: 'RabbitMQ broker olarak işlev görür.',
+            scenario: '<h5>Senaryo · RabbitMQ broker rolü</h5><p>Mesaj dağıtım pattern\'i.</p>' },
+          { id: 'space_based', technical: 'Space-Based', acronym: 'Paylaşımlı tuple/grid',
+            turkish: 'Veri ızgara/uzayında işleme',
+            explanation: 'Çok hızlı in-memory grid (Hazelcast).',
+            scenario: '<h5>Senaryo · Trading, gerçek zamanlı borsa</h5><p>Genelde fintech\'in özel altkümesi.</p>' },
+          { id: 'p2p', technical: 'P2P (Peer-to-Peer)', acronym: 'Eşler arası',
+            turkish: 'Merkezi sunucu yok',
+            explanation: 'BitTorrent, IPFS tarzı.',
+            scenario: '<h5>Senaryo · Federated/decentralized</h5><p>Genelde özel kullanım.</p>' },
+          { id: 'soa', technical: 'SOA (Service-Oriented)', acronym: 'Servis odaklı mimari',
+            turkish: 'Eski tip ESB temelli',
+            explanation: 'Kurumsal ESB tarzı eski yaklaşım, microservice tarafından domine edildi.',
+            scenario: '<h5>Senaryo · Klasik kurumsal entegrasyon</h5><p>Modern projede önerilmez.</p>' },
+          { id: 'primary_replica', technical: 'Primary-Replica', acronym: 'Master-replica',
+            turkish: 'Bir master, çoklu replika',
+            explanation: 'DB için pattern. Postgres replication.',
+            scenario: '<h5>Senaryo · Postgres read replica</h5><p>Yatay ölçek için zaten kullanılacak.</p>' },
+          { id: 'blackboard', technical: 'Blackboard', acronym: 'Ortak bilgi tahtası',
+            turkish: 'Paylaşılan bilgi havuzu',
+            explanation: 'AI/expert system için.',
+            scenario: '<h5>Senaryo · ML/AI orchestration</h5><p>Genelde özel kullanım.</p>' }
+        ]
+      }]
+    });
+
+    /* === 3 — UYGULAMA-IÇI MIMARILER === */
+    CATEGORIES.push({
+      id: 'uygulama_ici',
+      title: 'Uygulama-İçi Mimariler',
+      subtitle: 'Servisin / uygulamanın içindeki kod organizasyonu.',
+      icon: 'ph ph-cube',
+      iconBg: '#FFE9E0', iconColor: '#9A3412',
+      questions: [{
+        id: 'app_pattern',
+        title: 'Uygulama içi pattern\'ler (birden fazla)?',
+        purpose: 'Domain mantığı, UI ayrımı, sorumluluk dağılımı için referans patern seti.',
+        multiSelect: true,
+        options: [
+          { id: 'bff', preset: true, technical: 'BFF — Backend for Frontend', acronym: 'Backend for Frontend',
+            turkish: 'Her istemci tipine özel backend katmanı',
+            explanation: 'Headless mimaride admin_pages + front_pages + React Native = 3 farklı istemci, her birine özel BFF.',
+            scenario: '<h5>Senaryo · 3 istemci 3 BFF</h5><p>admin-bff, public-bff, mobile-bff. Ortak core FastAPI üstüne ince BFF katmanları. <strong>Kesin:</strong> headless + 2 SPA + 1 mobil seçildi.</p>' },
+          { id: 'mvc', technical: 'MVC', acronym: 'Model-View-Controller', turkish: 'Model-Görünüm-Denetleyici',
+            explanation: 'Klasik web ayrımı.',
+            scenario: '<h5>Senaryo · React side</h5><p>Frontend tarafı zaten Component → çıkarımsal MVC.</p>' },
+          { id: 'mvvm', technical: 'MVVM', acronym: 'Model-View-ViewModel', turkish: 'İki yönlü binding',
+            explanation: 'Vue, WPF, Knockout.',
+            scenario: '<h5>Senaryo · Frontend state pattern</h5><p>React\'te Hooks ile benzer sonuç.</p>' },
+          { id: 'mvi', technical: 'MVI', acronym: 'Model-View-Intent', turkish: 'Tek yönlü immutable akış',
+            explanation: 'Android, Redux-vari.',
+            scenario: '<h5>Senaryo · React Native</h5><p>Redux Toolkit ile uyumlu.</p>' },
+          { id: 'mvu_elm', technical: 'MVU / Elm', acronym: 'Model-View-Update', turkish: 'Elm Architecture',
+            explanation: 'Saf, fonksiyonel UI mimarisi.',
+            scenario: '<h5>Senaryo · Elm-vari React</h5><p>Reducer pattern temelidir.</p>' },
+          { id: 'flux_redux', technical: 'Flux / Redux', acronym: 'Tek yönlü veri akışı', turkish: 'Action → Reducer → Store → View',
+            explanation: 'React state yönetimi standardı.',
+            scenario: '<h5>Senaryo · Redux Toolkit ya da Zustand</h5><p>React + RN için natural choice; Zustand daha hafif.</p>' },
+          { id: 'hexagonal_ports_adapters', technical: 'Hexagonal (Ports & Adapters)', acronym: 'Altıgen mimari',
+            turkish: 'Domain dış dünyaya port/adapter ile soyutlanır',
+            explanation: 'Domain hiçbir framework\'e bağlı kalmaz.',
+            scenario: '<h5>Senaryo · Meta-framework çekirdeği</h5><p>FastAPI\'den bağımsız iş mantığı; testler framework\'süz koşar.</p>' },
+          { id: 'onion', technical: 'Onion', acronym: 'Soğan mimari', turkish: 'İç içe halkalar, bağımlılıklar içe',
+            explanation: 'Hexagonal\'in başka isimle versiyonu.',
+            scenario: '<h5>Senaryo · Clean Architecture\'a yakın</h5><p>Aynı felsefe.</p>' },
+          { id: 'clean_architecture', technical: 'Clean Architecture', acronym: 'Uncle Bob', turkish: 'Use-case katmanlı temiz mimari',
+            explanation: 'Onion + use case interactors.',
+            scenario: '<h5>Senaryo · Domain use cases</h5><p>RegisterUser, PlaceOrder gibi use case sınıfları.</p>' },
+          { id: 'cqrs', technical: 'CQRS', acronym: 'Command Query Responsibility Segregation', turkish: 'Yazma ve okuma modeli ayrı',
+            explanation: 'Write Postgres, read Elasticsearch — zaten yapılıyor pratikte.',
+            scenario: '<h5>Senaryo · Write/Read split</h5><p>Postgres write, Elasticsearch + Redis read. Önceki seçimler bunu doğal kılar.</p>' },
+          { id: 'saga', technical: 'Saga', acronym: 'Dağıtık işlem', turkish: 'Bir dizi yerel işlem + compensating action',
+            explanation: 'Dağıtık transaction\'ın modern çözümü.',
+            scenario: '<h5>Senaryo · Sipariş akışı</h5><p>Ödeme + stok + kargo: hangi adım başarısız olursa öncekiler geri alınır.</p>' },
+          { id: 'ddd', technical: 'DDD — Domain-Driven Design', acronym: 'Domain-Driven Design', turkish: 'Domain odaklı tasarım',
+            explanation: 'Bounded context, aggregate, ubiquitous language. Aşağıda DDD kavramları için ayrı bölüm var.',
+            scenario: '<h5>Senaryo · Çok sektörlü ürün</h5><p>Marketplace + B2B + fintech vs. çok sayıda domain var; DDD bunu yönetir.</p>' },
+          { id: 'vertical_slice', technical: 'Vertical Slice', acronym: 'Dikey kesit mimarisi', turkish: 'Feature bazlı dikey kesitler',
+            explanation: 'Katman değil özellik bazlı klasör.',
+            scenario: '<h5>Senaryo · features/checkout/ klasörü</h5><p>UI + API + DB tek klasörde.</p>' },
+          { id: 'feature_sliced_design', technical: 'Feature-Sliced Design', acronym: 'FSD', turkish: 'Frontend için FSD katmanları',
+            explanation: 'Frontend: entities/features/widgets/pages.',
+            scenario: '<h5>Senaryo · React tarafı</h5><p>shadcn + Flowbite ile uyumlu organize.</p>' },
+          { id: 'screaming_architecture', technical: 'Screaming Architecture', acronym: 'Bağıran klasör', turkish: 'Klasör adı kullanım alanını bağırır',
+            explanation: 'config/ değil, billing/ klasörü.',
+            scenario: '<h5>Senaryo · Yeni dev ilk bakışta domain\'i görür</h5><p>onboarding süresini azaltır.</p>' },
+          { id: 'mvp', technical: 'MVP — Model-View-Presenter', acronym: 'Model-View-Presenter', turkish: 'View pasif, Presenter mantığı tutar',
+            explanation: 'Eski Android tarzı, modern projede nadir.',
+            scenario: '<h5>Senaryo · Eski iş kodu</h5><p>Yeni projede tercih edilmez.</p>' },
+          { id: 'bce', technical: 'BCE — Boundary-Control-Entity', acronym: 'ICONIX/UML', turkish: 'Boundary-Control-Entity',
+            explanation: 'UML kökenli, modern projede yaygın değil.',
+            scenario: '<h5>Senaryo · Klasik UML metodolojisi</h5><p>Yeni proje için önerilmez.</p>' }
+        ]
+      }]
+    });
+
+    /* === 4 — DAĞITIK PATTERN: YAPISAL === */
+    CATEGORIES.push({ id: 'dagi_yapisal', title: 'Dağıtık Sistem · Yapısal Pattern', subtitle: 'Trafik akışı ve servisler arası bağlanma.', icon: 'ph ph-tree-structure', iconBg: '#E0F2FE', iconColor: '#075985', questions: [{ id: 'yapisal', title: 'Yapısal pattern\'ler (birden fazla)?', purpose: 'İstek nasıl giriyor, nereye yönleniyor, dış sistemle nasıl konuşuluyor.', multiSelect: true, options: [
+      { id: 'api_gateway', preset: true, technical: 'API Gateway', acronym: 'Tek giriş noktası', turkish: 'Tek giriş noktası: routing, auth, rate limit', explanation: 'BFF ile birlikte. REST + WS + SSE ortak giriş.', scenario: '<h5>Senaryo · Nginx + uygulama gateway</h5><p>Nginx önde + FastAPI app gateway. <strong>Kesin:</strong> Nginx + çoklu istemci.</p>' },
+      { id: 'proxy_reverse_proxy', preset: true, technical: 'Reverse Proxy', acronym: 'Ters vekil sunucu', turkish: 'Talebi başka sisteme yönlendirir/filtreler', explanation: 'Nginx zaten seçildi.', scenario: '<h5>Senaryo · Nginx TLS + proxy</h5><p>Let\'s Encrypt + cache + LB. <strong>Kesin:</strong> Nginx.</p>' },
+      { id: 'anti_corruption_layer', technical: 'Anti-Corruption Layer', acronym: 'ACL', turkish: 'Dış/eski modelden iç modeli koruyan çevirici', explanation: 'iyzico, Stripe, Mailgun, Twilio API\'lerini ACL ile sarma.', scenario: '<h5>Senaryo · 3.parti entegrasyonlar</h5><p>Her dış servisin formatı farklı; tek iç format için ACL\'ler.</p>' },
+      { id: 'adapter', technical: 'Adapter', acronym: 'Adaptör', turkish: 'Uyumsuz arayüzleri birbirine bağlama', explanation: 'Ödeme sağlayıcıları çoklu, ortak Adapter arayüzü.', scenario: '<h5>Senaryo · iyzico + Stripe + PayPal</h5><p>PaymentAdapter arayüzü, 3 implementasyon.</p>' },
+      { id: 'service_mesh', technical: 'Service Mesh', acronym: 'Istio/Linkerd', turkish: 'Servis-içi-servis iletişimi katmanı', explanation: 'K8s ekosisteminde; Docker Swarm seçildi, doğrudan uygun değil.', scenario: '<h5>Senaryo · Microservice geçişinde</h5><p>K8s\'e geçilirse.</p>' },
+      { id: 'sidecar', technical: 'Sidecar', acronym: 'Yardımcı konteyner', turkish: 'Servis pod\'una eşlik eden yardımcı', explanation: 'Log gönderici, proxy, vault agent.', scenario: '<h5>Senaryo · OpenTelemetry collector</h5><p>Her servisin yanında otel collector sidecar.</p>' },
+      { id: 'ambassador', technical: 'Ambassador', acronym: 'Dış çağrı vekili', turkish: 'Dışa giden trafiği proxy\'leyen yardımcı', explanation: 'Outbound API çağrılarını yöneten container.', scenario: '<h5>Senaryo · Dış servis hız limit aşımı</h5><p>Ambassador kuyruğa alıp gönderir.</p>' }
+    ]}]});
+
+    /* === 5 — DAĞITIK PATTERN: DAYANIKLILIK === */
+    CATEGORIES.push({ id: 'dagi_dayan', title: 'Dağıtık Sistem · Dayanıklılık', subtitle: 'Hata izolasyonu, retry, timeout, devre kesici.', icon: 'ph ph-shield-warning', iconBg: '#FEF3C7', iconColor: '#92400E', questions: [{ id: 'dayan', title: 'Dayanıklılık pattern\'leri (birden fazla)?', purpose: 'Bir bağımlılık (DB, API) bozulduğunda sistem nasıl ayakta kalır.', multiSelect: true, options: [
+      { id: 'circuit_breaker', preset: true, technical: 'Circuit Breaker', acronym: 'Devre kesici', turkish: 'Sürekli hata veren bağımlılığı geçici kapatır', explanation: 'EDA + microservice yolu için zorunlu.', scenario: '<h5>Senaryo · Stripe API down</h5><p>5 ardışık hata → Stripe çağrıları 60 sn kapalı. <strong>Kesin:</strong> 3.parti çok.</p>' },
+      { id: 'retry_with_backoff', preset: true, technical: 'Retry with Backoff', acronym: 'Geriye dönük artan bekleme', turkish: 'Artan bekleme ile yeniden dene', explanation: 'Geçici hatalar için zorunlu.', scenario: '<h5>Senaryo · RabbitMQ task retry</h5><p>1s, 2s, 4s, 8s ile retry, sonra DLQ. <strong>Kesin.</strong></p>' },
+      { id: 'timeout', preset: true, technical: 'Timeout', acronym: 'Süre sınırı', turkish: 'Sonsuz bekleme yerine sınır', explanation: 'Her HTTP/DB çağrısında olmalı.', scenario: '<h5>Senaryo · Yavaş 3.parti</h5><p>Default 30s. <strong>Kesin.</strong></p>' },
+      { id: 'health_check', preset: true, technical: 'Health Check', acronym: 'Liveness/Readiness', turkish: 'Sağlık kontrol uçları', explanation: 'Docker Swarm + rolling update için zorunlu.', scenario: '<h5>Senaryo · /healthz, /readyz</h5><p>Swarm health probe. <strong>Kesin.</strong></p>' },
+      { id: 'rate_limiter', preset: true, technical: 'Rate Limiter', acronym: 'İstek hızı sınırlama', turkish: 'Birim zamanda istek sayısı sınırı', explanation: 'Önceki seçim: IP + Kullanıcı.', scenario: '<h5>Senaryo · Redis token bucket</h5><p>Kullanıcı 100/dk. <strong>Kesin.</strong></p>' },
+      { id: 'bulkhead', technical: 'Bulkhead', acronym: 'Bölmeli izolasyon', turkish: 'Kaynakları izole bölmelere ayır', explanation: 'Bir modülün havuzu dolarsa diğerleri batmaz.', scenario: '<h5>Senaryo · Ayrı thread pool</h5><p>Search ayrı, billing ayrı.</p>' },
+      { id: 'throttling', technical: 'Throttling', acronym: 'Yavaşlatma', turkish: 'Aşırı yükü düşür / kuyruğa al', explanation: 'Rate limit\'in yumuşak versiyonu.', scenario: '<h5>Senaryo · Adaptive throttling</h5><p>Sistem yorgunsa istemcilere gecikme ekle.</p>' },
+      { id: 'fallback', technical: 'Fallback', acronym: 'Yedek cevap', turkish: 'Birincil başarısızsa alternatif', explanation: 'Cache\'den eski veri ver, default değer dön.', scenario: '<h5>Senaryo · Ürün önerisi servisi yok</h5><p>"Popular" listesini fallback olarak ver.</p>' }
+    ]}]});
+
+    /* === 6 — DAĞITIK PATTERN: TUTARLILIK & MESAJLAŞMA === */
+    CATEGORIES.push({ id: 'dagi_tutar', title: 'Dağıtık Sistem · Tutarlılık & Mesajlaşma', subtitle: 'Birden fazla servis arası tutarlılığı sağlamak.', icon: 'ph ph-arrows-clockwise', iconBg: '#FCE7F3', iconColor: '#9D174D', questions: [{ id: 'tutar', title: 'Tutarlılık ve mesajlaşma pattern\'leri (birden fazla)?', purpose: 'Distributed transaction yerine modern eventual consistency yaklaşımları.', multiSelect: true, options: [
+      { id: 'outbox_pattern', preset: true, technical: 'Outbox Pattern', acronym: 'Çıkış Kutusu', turkish: 'DB transaction ile mesaj üretimi atomik', explanation: 'Postgres + RabbitMQ için zorunlu.', scenario: '<h5>Senaryo · Sipariş yarıda kalmaz</h5><p>order_outbox tablosu, ayrı süreç RabbitMQ\'ya gönderir. <strong>Kesin.</strong></p>' },
+      { id: 'inbox_pattern', preset: true, technical: 'Inbox Pattern', acronym: 'Giriş Kutusu', turkish: 'Tüketici tarafında idempotency için işlenen mesajları kayıt', explanation: 'Aynı mesaj iki kez gelirse ikinci işlenmez.', scenario: '<h5>Senaryo · Mesaj duplicate koruması</h5><p>message_inbox tablosu unique key. <strong>Kesin.</strong></p>' },
+      { id: 'idempotent_receiver', preset: true, technical: 'Idempotent Receiver', acronym: 'Tekrarlı çağrıya dayanıklı alıcı', turkish: 'Aynı mesajı birden fazla almak güvenli', explanation: 'Inbox\'la birlikte uygulamada koşul.', scenario: '<h5>Senaryo · Webhook tekrar gönderimi</h5><p>iyzico 3 kez aynı olayı gönderebilir.</p>' },
+      { id: 'materialized_view', technical: 'Materialized View', acronym: 'Önceden hesaplanmış görünüm', turkish: 'Önceden hesaplanmış okuma modeli', explanation: 'Elasticsearch read model olarak.', scenario: '<h5>Senaryo · Elasticsearch read</h5><p>Postgres write event\'leri → ES projection.</p>' },
+      { id: 'saga_orchestration', technical: 'Saga: Orchestration', acronym: 'Orkestrasyon Saga', turkish: 'Merkezi orchestrator adımları yönetir', explanation: 'Camunda, Temporal benzeri.', scenario: '<h5>Senaryo · Karmaşık ödeme akışı</h5><p>Merkezi state, her adım izlenir.</p>' },
+      { id: 'saga_choreography', technical: 'Saga: Choreography', acronym: 'Koreografi Saga', turkish: 'Servisler olaylarla koordine olur', explanation: 'Merkezi koordinatör yok.', scenario: '<h5>Senaryo · EDA ile doğal</h5><p>Modüller olay dinler.</p>' },
+      { id: 'event_sourcing', technical: 'Event Sourcing', acronym: 'Olay kaynaklı saklama', turkish: 'Durum yerine olaylar dizisi saklanır', explanation: 'Audit ve geçmiş için güçlü.', scenario: '<h5>Senaryo · Fintech finansal işlem geçmişi</h5><p>Her hareket olay; bakiye türetilir.</p>' },
+      { id: 'crdt', technical: 'CRDT', acronym: 'Conflict-free Replicated Data Type', turkish: 'Çakışmasız otomatik birleşen veri tipi', explanation: 'Yjs/Automerge.', scenario: '<h5>Senaryo · Çoklu kullanıcı dokümanı</h5><p>Google Docs tarzı.</p>' },
+      { id: 'two_phase_commit', technical: '2PC (Two-Phase Commit)', acronym: 'İki fazlı commit', turkish: 'Dağıtık transaction', explanation: 'Modern microservice\'te önerilmez.', scenario: '<h5>Senaryo · Klasik kurumsal</h5><p>Saga tercih edilir.</p>' }
+    ]}]});
+
+    /* === 7 — DAĞITIK PATTERN: ÖNBELLEKLEME === */
+    CATEGORIES.push({ id: 'dagi_cache', title: 'Dağıtık Sistem · Önbellekleme', subtitle: 'Redis ile cache stratejisi.', icon: 'ph ph-database', iconBg: '#DCFCE7', iconColor: '#166534', questions: [{ id: 'cache_pattern', title: 'Cache pattern\'leri (birden fazla)?', purpose: 'Hangi senaryoda hangi cache stratejisi.', multiSelect: true, options: [
+      { id: 'cache_aside', preset: true, technical: 'Cache-Aside', acronym: 'Lazy loading', turkish: 'Önce cache\'e bak, yoksa DB\'den getir', explanation: 'Redis ile standart.', scenario: '<h5>Senaryo · Kullanıcı profil cache</h5><p>get_user(id) → Redis miss → DB → Redis. <strong>Kesin.</strong></p>' },
+      { id: 'read_through', technical: 'Read-Through', acronym: 'Cache okuma transparent', turkish: 'Cache miss\'te cache kendisi DB\'den çeker', explanation: 'Cache library uygulamadan saklar.', scenario: '<h5>Senaryo · ORM caching</h5><p>Uygulama bilmek zorunda kalmaz.</p>' },
+      { id: 'write_through', technical: 'Write-Through', acronym: 'Senkron yazma', turkish: 'Yazma cache + DB\'ye senkron', explanation: 'Cache her zaman güncel, yazma yavaş.', scenario: '<h5>Senaryo · Tutarlılık öncelikli</h5><p>Okuma güncel.</p>' },
+      { id: 'write_behind', technical: 'Write-Behind', acronym: 'Async yazma', turkish: 'Yazma önce cache, async DB', explanation: 'Hız; veri kaybı riski var.', scenario: '<h5>Senaryo · Analytics counter</h5><p>Sayaç hızlı, batch DB.</p>' },
+      { id: 'refresh_ahead', technical: 'Refresh-Ahead', acronym: 'Proaktif yenileme', turkish: 'TTL bitmeden proaktif yenilenir', explanation: 'Popular item\'lar için.', scenario: '<h5>Senaryo · Anasayfa öne çıkanlar</h5><p>TTL bitmek üzereyken refresh.</p>' }
+    ]}]});
+
+    /* === 8 — DAĞITIK PATTERN: VERİ === */
+    CATEGORIES.push({ id: 'dagi_veri', title: 'Dağıtık Sistem · Veri', subtitle: 'Sharding, partitioning, replication.', icon: 'ph ph-hard-drives', iconBg: '#FAE8FF', iconColor: '#86198F', questions: [{ id: 'veri_pat', title: 'Veri dağıtım pattern\'leri (birden fazla)?', purpose: 'Ölçek, HA ve domain izolasyonu.', multiSelect: true, options: [
+      { id: 'replication', preset: true, technical: 'Replication', acronym: 'Çoğaltma', turkish: 'Birden fazla kopya', explanation: 'Sıfır kayıp + multi-region için zorunlu.', scenario: '<h5>Senaryo · Postgres streaming replication</h5><p>Frankfurt primary, Helsinki standby. <strong>Kesin.</strong></p>' },
+      { id: 'partitioning', technical: 'Partitioning', acronym: 'Bölümleme', turkish: 'Tek DB içinde bölümleme', explanation: 'Postgres declarative partitioning.', scenario: '<h5>Senaryo · Olay log tablosu</h5><p>Aylık partition.</p>' },
+      { id: 'database_per_service', technical: 'Database per Service', acronym: 'Servis başına DB', turkish: 'Her servis kendi DB\'sini sahiplenir', explanation: 'Modüler monolit içinde "schema per module".', scenario: '<h5>Senaryo · Modülün şeması ayrı</h5><p>billing schema vs identity schema.</p>' },
+      { id: 'sharding', technical: 'Sharding', acronym: 'Yatay parçalama', turkish: 'Veriyi anahtara göre parça', explanation: 'Hyperscale\'de gerekli.', scenario: '<h5>Senaryo · 1B+ kayıt</h5><p>Citus, CockroachDB.</p>' },
+      { id: 'federation', technical: 'Federation', acronym: 'Federasyon', turkish: 'Farklı kaynakları tek arayüzde', explanation: 'GraphQL Federation, FDW.', scenario: '<h5>Senaryo · Çoklu DB tek sorgu</h5><p>Postgres + ES federation.</p>' },
+      { id: 'shared_database_antipattern', technical: 'Shared DB (anti-pattern)', acronym: 'Paylaşımlı DB', turkish: 'Microservice\'lerin aynı DB\'yi paylaşması', explanation: 'Microservice geçişine engel.', scenario: '<h5>Senaryo · Modüller arası sıkı bağlanma</h5><p>İşaretlemeniz önerilmez.</p>' }
+    ]}]});
+
+    /* === 9 — DAĞITIK PATTERN: EVRİM === */
+    CATEGORIES.push({ id: 'dagi_evrim', title: 'Dağıtık Sistem · Evrim & Göç', subtitle: 'Sistemi nasıl değiştiriyoruz.', icon: 'ph ph-git-merge', iconBg: '#FEE2E2', iconColor: '#991B1B', questions: [{ id: 'evrim', title: 'Evrim ve göç pattern\'leri (birden fazla)?', purpose: 'Schema/API/uygulama değiştirirken güvenli geçiş.', multiSelect: true, options: [
+      { id: 'expand_and_contract', preset: true, technical: 'Expand and Contract', acronym: 'Genişlet ve daralt', turkish: 'Önce genişlet, sonra daralt', explanation: 'Sıfır downtime migration temeli.', scenario: '<h5>Senaryo · Kolon yeniden adlandırma</h5><p>Önce yeni kolon, çift yaz, eski sil. <strong>Kesin.</strong></p>' },
+      { id: 'strangler_fig', technical: 'Strangler Fig', acronym: 'Sarmaşık inciri', turkish: 'Eski sistemi parça parça değiştir', explanation: 'Modüler monolit → microservice için.', scenario: '<h5>Senaryo · Aşamalı modül çıkartma</h5><p>Proxy üzerinden trafiği yönlendir.</p>' },
+      { id: 'branch_by_abstraction', technical: 'Branch by Abstraction', acronym: 'Soyutlama altında dallanma', turkish: 'İki implementasyon yan yana', explanation: 'Refactor sırasında feature flag.', scenario: '<h5>Senaryo · Eski search → Elasticsearch</h5><p>Interface aynı, internal değişir.</p>' },
+      { id: 'parallel_run', technical: 'Parallel Run', acronym: 'Paralel koşum', turkish: 'Eski + yeni paralel + karşılaştır', explanation: 'Hesaplama doğruluğunu doğrula.', scenario: '<h5>Senaryo · Finansal hesaplama göçü</h5><p>Fark loglanır.</p>' }
+    ]}]});
+
+    /* === 10 — İLETİŞİM & ENTEGRASYON === */
+    CATEGORIES.push({ id: 'iletisim', title: 'İletişim ve Entegrasyon Protokolleri', subtitle: 'Servisler ve istemciler arası haberleşme.', icon: 'ph ph-broadcast', iconBg: '#FEF9C3', iconColor: '#854D0E', questions: [{ id: 'iletisim_prot', title: 'Hangi protokoller (birden fazla)?', purpose: 'Frontend, mobil, 3.parti, microservice iletişim katmanları.', multiSelect: true, options: [
+      { id: 'rest', preset: true, technical: 'REST', acronym: 'Representational State Transfer', turkish: 'HTTP + kaynak, stateless', explanation: 'Önceki seçim.', scenario: '<h5>Senaryo · FastAPI standart</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'websocket', preset: true, technical: 'WebSocket', acronym: 'Tam duplex socket', turkish: 'Çift yönlü kalıcı bağlantı', explanation: 'Önceki seçim.', scenario: '<h5>Senaryo · Sohbet, canlı ihale</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'sse', preset: true, technical: 'SSE', acronym: 'Server-Sent Events', turkish: 'Sunucu→istemci tek yön akış', explanation: 'Önceki seçim, AI streaming ideal.', scenario: '<h5>Senaryo · LLM cevap streaming</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'amqp', preset: true, technical: 'AMQP', acronym: 'Advanced Message Queueing', turkish: 'Kurumsal mesajlaşma protokolü', explanation: 'RabbitMQ AMQP konuşur.', scenario: '<h5>Senaryo · RabbitMQ</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'webhook_callback', preset: true, technical: 'Webhook', acronym: 'HTTP callback', turkish: 'Olay olunca alıcıya POST', explanation: 'iyzico/Stripe/Mailgun/kargo webhook.', scenario: '<h5>Senaryo · Ödeme onayı</h5><p><strong>Kesin:</strong> ödeme + email + kargo.</p>' },
+      { id: 'pub_sub', preset: true, technical: 'Pub/Sub', acronym: 'Yayınla/Abone', turkish: 'Yayıncı-abone gevşek bağlı', explanation: 'RabbitMQ exchange.', scenario: '<h5>Senaryo · "Sipariş oluştu" çoklu tüketici</h5><p><strong>Kesin:</strong> EDA.</p>' },
+      { id: 'message_queue_p2p', preset: true, technical: 'Message Queue (P2P)', acronym: 'Nokta-nokta kuyruk', turkish: 'Tek tüketici kuyruktan alır', explanation: 'Celery task queue.', scenario: '<h5>Senaryo · Celery worker</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'graphql', technical: 'GraphQL', acronym: 'Graph Query Language', turkish: 'İstemcinin alan seçimi', explanation: 'Karmaşık mobil için fayda.', scenario: '<h5>Senaryo · React Native</h5><p>Strawberry FastAPI ile.</p>' },
+      { id: 'grpc', technical: 'gRPC', acronym: 'Google RPC', turkish: 'HTTP/2 + Protobuf RPC', explanation: 'İç servisler arası düşük gecikme.', scenario: '<h5>Senaryo · Microservice iç çağrı</h5><p>Sadece serv-to-serv.</p>' },
+      { id: 'kafka_protocol', technical: 'Kafka Protocol', acronym: 'Log stream', turkish: 'Log tabanlı yüksek throughput', explanation: 'Event sourcing + IoT için.', scenario: '<h5>Senaryo · IoT sensör</h5><p>Kalıcı log, yeniden okunabilir.</p>' },
+      { id: 'mqtt', technical: 'MQTT', acronym: 'IoT pub/sub', turkish: 'Hafif IoT pub/sub', explanation: 'IoT sektörü seçildi → zorunlu.', scenario: '<h5>Senaryo · IoT sensör</h5><p>Düşük bant genişliği.</p>' },
+      { id: 'nats', technical: 'NATS', acronym: 'Cloud-native messaging', turkish: 'Hafif hızlı mesajlaşma', explanation: 'RabbitMQ alternatifi.', scenario: '<h5>Senaryo · Mikroservis pub/sub</h5><p>Go ekosistemi.</p>' },
+      { id: 'webrtc', technical: 'WebRTC', acronym: 'Web Real-Time Communication', turkish: 'P2P medya/veri', explanation: 'HealthTech video görüşme.', scenario: '<h5>Senaryo · Telesağlık</h5><p>Doktor-hasta video.</p>' },
+      { id: 'long_polling', technical: 'Long Polling', acronym: 'Uzun bekleyen sorgu', turkish: 'Bağlantıyı tutar', explanation: 'SSE/WS olmadığında fallback.', scenario: '<h5>Senaryo · Eski tarayıcı/proxy</h5><p>SSE/WS bloklayan ortam.</p>' },
+      { id: 'polling', technical: 'Polling', acronym: 'Periyodik sorgu', turkish: 'İstemci periyodik sorgu', explanation: 'Basit, verimsiz.', scenario: '<h5>Senaryo · MVP</h5><p>Üretimde SSE/WS tercih.</p>' },
+      { id: 'soap', technical: 'SOAP', acronym: 'XML kurumsal', turkish: 'XML tabanlı eski kurumsal', explanation: 'Bankacılık entegrasyonlarda.', scenario: '<h5>Senaryo · GİB e-fatura</h5><p>SOAP zorunlu olabilir.</p>' },
+      { id: 'json_rpc_xml_rpc', technical: 'JSON-RPC / XML-RPC', acronym: 'RPC protokolü', turkish: 'Basit RPC', explanation: 'Blockchain JSON-RPC.', scenario: '<h5>Senaryo · Ethereum/Bitcoin RPC</h5><p>Blockchain düğümleri.</p>' },
+      { id: 'hateoas', technical: 'HATEOAS', acronym: 'Hypermedia as State Engine', turkish: 'REST yanıtında link gömme', explanation: 'REST saf hali, nadir.', scenario: '<h5>Senaryo · Self-discoverable API</h5><p>Çoğu proje için over-kill.</p>' },
+      { id: 'odata', technical: 'OData', acronym: 'Open Data Protocol', turkish: 'Microsoft standart sorgu protokolü', explanation: 'Enterprise SAP/Microsoft.', scenario: '<h5>Senaryo · SAP entegrasyonu</h5><p>Microsoft dünyasında popüler.</p>' },
+      { id: 'json_api', technical: 'JSON:API', acronym: 'JSON yanıt standardı', turkish: 'Standart JSON formatı', explanation: 'REST yanıt yapısını standartlaştırır.', scenario: '<h5>Senaryo · Geniş public API</h5><p>Disiplinli format.</p>' }
+    ]}]});
+
+    /* === 11 — FRONTEND MIMARILERI === */
+    CATEGORIES.push({ id: 'fe_mimari', title: 'Frontend Mimarileri', subtitle: 'Headless + 2 SPA + React Native için frontend pattern\'ler.', icon: 'ph ph-browser', iconBg: '#FCE7F3', iconColor: '#9D174D', questions: [{ id: 'fe_pattern', title: 'Frontend mimari pattern\'leri (birden fazla)?', purpose: 'admin_pages + front_pages headless + RN. Hangi pattern\'ler bağlayıcı.', multiSelect: true, options: [
+      { id: 'component_based', preset: true, technical: 'Component-Based', acronym: 'Bileşen tabanlı', turkish: 'Yeniden kullanılabilir UI bileşenleri', explanation: 'React zaten.', scenario: '<h5>Senaryo · shadcn/Flowbite</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'spa', preset: true, technical: 'SPA', acronym: 'Single Page Application', turkish: 'Tek sayfalı uygulama', explanation: 'Vite + React.', scenario: '<h5>Senaryo · admin + front 2 SPA</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'headless_composable', preset: true, technical: 'Headless / Composable', acronym: 'Sunum-mantık ayrımı', turkish: 'Backend yalnız API döner', explanation: 'Kullanıcı tercihi.', scenario: '<h5>Senaryo · API-first 3 istemci aynı API</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'module_federation', technical: 'Module Federation', acronym: 'Webpack 5 / Vite plugin', turkish: 'Bağımsız build\'ler arası modül paylaşımı', explanation: 'admin + front ortak komponent kütüphanesi.', scenario: '<h5>Senaryo · Paylaşımlı tasarım sistemi</h5><p>shadcn komponentleri runtime federated.</p>' },
+      { id: 'micro_frontends', technical: 'Micro Frontends', acronym: 'Mikro Frontend', turkish: 'Bağımsız deploy parçaları', explanation: 'admin/front ayrı ekipler.', scenario: '<h5>Senaryo · İki ayrı ekip</h5><p>Farklı release döngüleri.</p>' },
+      { id: 'atomic_design', technical: 'Atomic Design', acronym: 'Atomik tasarım', turkish: 'Atom/molecule/organism hiyerarşi', explanation: 'shadcn ile uyumlu.', scenario: '<h5>Senaryo · Storybook</h5><p>Tasarımcı-developer ortak dil.</p>' },
+      { id: 'pwa', technical: 'PWA', acronym: 'Progressive Web App', turkish: 'Tarayıcıdan kurulabilen app', explanation: 'Mobil web seçildi.', scenario: '<h5>Senaryo · admin/front PWA</h5><p>RN + PWA çift kanal.</p>' },
+      { id: 'ssr', technical: 'SSR', acronym: 'Server-Side Rendering', turkish: 'Sunucu tarafında render', explanation: 'Yerel SEO seçildi.', scenario: '<h5>Senaryo · front_pages SSR</h5><p>Astro/Remix/Vite SSR (Next.js yasak).</p>' },
+      { id: 'ssg', technical: 'SSG', acronym: 'Static Site Generation', turkish: 'Statik üretim', explanation: 'Marketing/blog için.', scenario: '<h5>Senaryo · Astro blog</h5><p>Statik + CDN.</p>' },
+      { id: 'isr', technical: 'ISR', acronym: 'Incremental Static Regeneration', turkish: 'Aşamalı statik yeniden üretim', explanation: 'Belirli sürelerde üret.', scenario: '<h5>Senaryo · Sık güncellenen statik</h5><p>Astro/Vike.</p>' },
+      { id: 'jamstack', technical: 'Jamstack', acronym: 'JS + API + Markup', turkish: 'Statik first', explanation: 'front_pages için uygun.', scenario: '<h5>Senaryo · Marketing</h5><p>Build-time + CDN + API.</p>' },
+      { id: 'edge_rendering', technical: 'Edge Rendering', acronym: 'Kenar render', turkish: 'CDN kenarında render', explanation: 'Cloudflare Workers.', scenario: '<h5>Senaryo · Çoklu coğrafya</h5><p>Frankfurt/Helsinki/TR edge.</p>' },
+      { id: 'island_architecture', technical: 'Island Architecture', acronym: 'Astro adacık', turkish: 'Statik HTML içinde interaktif ada bileşenler', explanation: 'front_pages için ideal.', scenario: '<h5>Senaryo · Astro front_pages</h5><p>Daha az JS.</p>' },
+      { id: 'resumability', technical: 'Resumability', acronym: 'Qwik tarzı', turkish: 'Hydration yerine devam', explanation: 'Qwik — çok yeni.', scenario: '<h5>Senaryo · Aşırı düşük JS</h5><p>Bug yüzeyi vs olgunluk.</p>' },
+      { id: 'progressive_hydration', technical: 'Progressive Hydration', acronym: 'Aşamalı hydration', turkish: 'Hydration parçalar halinde', explanation: 'React 18 Suspense.', scenario: '<h5>Senaryo · Büyük sayfa</h5><p>Önce görünen kısım canlanır.</p>' },
+      { id: 'server_driven_ui', technical: 'Server-Driven UI', acronym: 'Sunucu yönlendirmeli UI', turkish: 'UI tanımını sunucu döner', explanation: 'Mobil update dert olduğunda.', scenario: '<h5>Senaryo · RN dinamik form</h5><p>App update gerekmez.</p>' },
+      { id: 'mpa', technical: 'MPA', acronym: 'Multi-Page Application', turkish: 'Çok sayfalı sunucu render', explanation: 'Headless ile çelişir.', scenario: '<h5>Senaryo · Headless ile uyumsuz</h5><p>İşaretlemeyiniz.</p>' }
+    ]}]});
+
+    /* === 12 — DDD STRATEJIK === */
+    CATEGORIES.push({ id: 'ddd_strat', title: 'DDD — Stratejik Kavramlar', subtitle: 'Domain-Driven Design üst seviye.', icon: 'ph ph-compass', iconBg: '#E0E7FF', iconColor: '#3730A3', questions: [{ id: 'ddd_s', title: 'Stratejik DDD kavramları (birden fazla)?', purpose: 'Çok sektörlü ürün için domain ayrımı.', multiSelect: true, options: [
+      { id: 'bounded_context', technical: 'Bounded Context', acronym: 'Sınırlı bağlam', turkish: 'Modelin geçerli olduğu kavramsal sınır', explanation: 'identity User ≠ billing User.', scenario: '<h5>Senaryo · Marketplace + fintech + healthtech</h5><p>Her birinde User farklı.</p>' },
+      { id: 'context_map', technical: 'Context Map', acronym: 'Bağlam haritası', turkish: 'Context\'ler arası ilişki haritası', explanation: 'Hangi context hangisini besler.', scenario: '<h5>Senaryo · Mimari belgesi başlangıcı</h5><p>Ekibi bağlar.</p>' },
+      { id: 'ubiquitous_language', technical: 'Ubiquitous Language', acronym: 'Ortak dil', turkish: 'Domain uzmanı + dev ortak dil', explanation: 'Aynı kavrama aynı ad.', scenario: '<h5>Senaryo · İş toplantısı</h5><p>"İlan" mı "listing" mi — tek tanım.</p>' },
+      { id: 'subdomain_core', technical: 'Core Subdomain', acronym: 'Çekirdek alan', turkish: 'Rekabet avantajı yaratan ana alan', explanation: 'Asıl yatırım.', scenario: '<h5>Senaryo · Meta-framework çekirdeği</h5><p>Buraya en kıdemli devler.</p>' },
+      { id: 'subdomain_supporting', technical: 'Supporting Subdomain', acronym: 'Destekleyici alan', turkish: 'Core\'u destekleyen özel alan', explanation: 'Önemli ama core değil.', scenario: '<h5>Senaryo · Kullanıcı yönetimi</h5><p>Olmazsa olmaz.</p>' },
+      { id: 'subdomain_generic', technical: 'Generic Subdomain', acronym: 'Genel alan', turkish: 'Hazır çözümle karşılanabilen', explanation: 'Auth, payments — SaaS al.', scenario: '<h5>Senaryo · Keycloak vs kendi auth</h5><p>Hazır çözüm.</p>' },
+      { id: 'context_map_iliskileri', technical: 'Context Map İlişkileri', acronym: 'CSP/Conformist/Shared Kernel/OHS/PL/ACL/Partnership', turkish: 'Bağlamlar arası ilişki tipleri', explanation: 'Customer-Supplier, Shared Kernel, ACL vs.', scenario: '<h5>Senaryo · billing → identity</h5><p>billing identity\'nin müşterisi (CSP).</p>' }
+    ]}]});
+
+    /* === 13 — DDD TAKTIK === */
+    CATEGORIES.push({ id: 'ddd_tact', title: 'DDD — Taktik Kavramlar', subtitle: 'Kod seviyesinde DDD.', icon: 'ph ph-cube-focus', iconBg: '#E0E7FF', iconColor: '#3730A3', questions: [{ id: 'ddd_t', title: 'Taktik DDD kavramları (birden fazla)?', purpose: 'DDD seçtiyseniz bu yapı blokları.', multiSelect: true, options: [
+      { id: 'aggregate', technical: 'Aggregate', acronym: 'Birleşik', turkish: 'Transactional tutarlılık birimi', explanation: 'Tek root\'tan erişim.', scenario: '<h5>Senaryo · Order aggregate</h5><p>Order + Item + Address.</p>' },
+      { id: 'aggregate_root', technical: 'Aggregate Root', acronym: 'Birleşik kök', turkish: 'Aggregate tek dış girişi', explanation: 'Repository sadece root\'u yükler.', scenario: '<h5>Senaryo · OrderRepository</h5><p>Order load, item ayrı değil.</p>' },
+      { id: 'entity', technical: 'Entity', acronym: 'Varlık', turkish: 'Kimliği olan, zamanla değişen', explanation: 'User, Order, Listing.', scenario: '<h5>Senaryo · User entity</h5><p>id ile özdeşleşir.</p>' },
+      { id: 'value_object', technical: 'Value Object', acronym: 'Değer nesnesi', turkish: 'Kimliksiz, immutable', explanation: 'Money, Address.', scenario: '<h5>Senaryo · Money immutable</h5><p>Money(100, "TRY") eşitlik değerle.</p>' },
+      { id: 'domain_service', technical: 'Domain Service', acronym: 'Domain hizmeti', turkish: 'Entity\'ye sığmayan mantık', explanation: 'Birden fazla entity\'yi ilgilendiren.', scenario: '<h5>Senaryo · PriceCalculator</h5><p>Order + Discount + Tax.</p>' },
+      { id: 'domain_event', technical: 'Domain Event', acronym: 'Domain olayı', turkish: 'Olmuş geçmiş zamanlı olgu', explanation: 'OrderPlaced. EDA omurgası.', scenario: '<h5>Senaryo · OrderPlaced → email + stok</h5><p>EDA ile birleşir.</p>' },
+      { id: 'repository', technical: 'Repository', acronym: 'Depo', turkish: 'Aggregate yükle/kaydet arayüzü', explanation: 'SQLAlchemy üstüne Repository.', scenario: '<h5>Senaryo · OrderRepository.save(order)</h5><p>Domain SQLAlchemy\'den habersiz.</p>' },
+      { id: 'factory', technical: 'Factory', acronym: 'Fabrika', turkish: 'Karmaşık nesne oluşturma', explanation: 'Birden çok bağımlılığı olan.', scenario: '<h5>Senaryo · OrderFactory.create</h5><p>Validation + initial state.</p>' },
+      { id: 'specification', technical: 'Specification', acronym: 'Şartname', turkish: 'Birleştirilebilir kural', explanation: 'is_premium AND has_active_sub.', scenario: '<h5>Senaryo · İndirim uygunluk</h5><p>Kural object\'leri komposable.</p>' },
+      { id: 'anemic_vs_rich_domain', technical: 'Anemic vs Rich Domain', acronym: 'Davranışsız vs davranışlı', turkish: 'Davranış taşıyan model tercih', explanation: 'Domain class\'ı iş kuralını içerir.', scenario: '<h5>Senaryo · Rich domain</h5><p>order.cancel() içinde kural.</p>' }
+    ]}]});
+
+    /* === 14 — TASARIM PRENSIPLERI === */
+    CATEGORIES.push({ id: 'prensip', title: 'Tasarım Prensipleri', subtitle: 'Kod kalitesi ve mimari yönlendirici prensipler.', icon: 'ph ph-scales', iconBg: '#DCFCE7', iconColor: '#166534', questions: [{ id: 'prensip_secim', title: 'Benimsenecek prensipler (birden fazla)?', purpose: 'Code review, refactor, mimari karar ortak referans.', multiSelect: true, options: [
+      { id: 'dry', preset: true, technical: 'DRY', acronym: 'Don\'t Repeat Yourself', turkish: 'Tekrar etme', explanation: 'Endüstri zorunluluğu.', scenario: '<h5>Senaryo · 3 yerde aynı validation</h5><p>Tek yere taşı. <strong>Kesin.</strong></p>' },
+      { id: 'kiss', preset: true, technical: 'KISS', acronym: 'Keep It Simple, Stupid', turkish: 'Basit tut', explanation: 'Over-engineering düşmanı.', scenario: '<h5>Senaryo · Yamuk soyutlama</h5><p>Önce basit. <strong>Kesin.</strong></p>' },
+      { id: 'yagni', preset: true, technical: 'YAGNI', acronym: 'You Aren\'t Gonna Need It', turkish: 'İhtiyacın olmayacak', explanation: 'Olmayan ihtiyaç için kod yazma.', scenario: '<h5>Senaryo · "İleride lazım"</h5><p>Şu an gerek yoksa yazma. <strong>Kesin.</strong></p>' },
+      { id: 'solid_srp', preset: true, technical: 'SOLID — SRP', acronym: 'Single Responsibility', turkish: 'Tek sorumluluk', explanation: 'Bir sınıf bir değişme sebebi.', scenario: '<h5>Senaryo · 800 satırlık sınıf</h5><p>Böl. <strong>Kesin.</strong></p>' },
+      { id: 'solid_ocp', preset: true, technical: 'SOLID — OCP', acronym: 'Open/Closed', turkish: 'Genişlemeye açık, değişime kapalı', explanation: 'Plugin ile genişle.', scenario: '<h5>Senaryo · Yeni ödeme sağlayıcı</h5><p>Adapter ekle. <strong>Kesin.</strong></p>' },
+      { id: 'solid_lsp', preset: true, technical: 'SOLID — LSP', acronym: 'Liskov Substitution', turkish: 'Alt sınıf üst yerine geçebilmeli', explanation: 'Davranış sözleşmesi.', scenario: '<h5>Senaryo · Polymorphism</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'solid_isp', preset: true, technical: 'SOLID — ISP', acronym: 'Interface Segregation', turkish: 'Arayüzleri küçük tut', explanation: 'Kullanmayan implement etmesin.', scenario: '<h5>Senaryo · 20 metodlu interface</h5><p>Böl. <strong>Kesin.</strong></p>' },
+      { id: 'solid_dip', preset: true, technical: 'SOLID — DIP', acronym: 'Dependency Inversion', turkish: 'Soyutlamaya bağlı ol', explanation: 'IoC/DI temeli.', scenario: '<h5>Senaryo · Hexagonal port</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'separation_of_concerns', preset: true, technical: 'Separation of Concerns', acronym: 'SoC', turkish: 'Farklı sorumluluklar farklı modüllere', explanation: 'Endüstri standardı.', scenario: '<h5>Senaryo · UI içinde DB</h5><p>Ayır. <strong>Kesin.</strong></p>' },
+      { id: 'high_cohesion_low_coupling', preset: true, technical: 'High Cohesion / Low Coupling', acronym: 'Yüksek bağlılık / düşük bağımlılık', turkish: 'Modül içi sıkı, dışı gevşek', explanation: 'İyi modülün tanımı.', scenario: '<h5>Senaryo · Modüler monolit</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'ioc_di', preset: true, technical: 'IoC / DI', acronym: 'Inversion of Control', turkish: 'Kontrolün tersine çevrilmesi', explanation: 'FastAPI Depends().', scenario: '<h5>Senaryo · FastAPI Depends</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'twelve_factor_app', preset: true, technical: '12-Factor App', acronym: '12 madde metodoloji', turkish: 'Cloud-native SaaS metodolojisi', explanation: 'Config env, log stream, stateless.', scenario: '<h5>Senaryo · Docker + Hetzner</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'fail_fast', preset: true, technical: 'Fail Fast', acronym: 'Hızlı hata', turkish: 'Erken yakala', explanation: 'Pydantic validation.', scenario: '<h5>Senaryo · Endpoint girişi</h5><p>Geçersiz input 422. <strong>Kesin.</strong></p>' },
+      { id: 'composition_over_inheritance', technical: 'Composition over Inheritance', acronym: 'Kalıtım yerine bileşim', turkish: 'Bileşim tercih', explanation: 'Derin kalıtım ağacından kaçın.', scenario: '<h5>Senaryo · Mixin</h5><p>Daha esnek.</p>' },
+      { id: 'tell_dont_ask', technical: 'Tell, Don\'t Ask', acronym: 'Sor değil söyle', turkish: 'Davranışı delege et', explanation: 'Encapsulation.', scenario: '<h5>Senaryo · order.cancel() vs status="cancelled"</h5><p>İlki doğru.</p>' },
+      { id: 'law_of_demeter', technical: 'Law of Demeter', acronym: 'En az bilgi', turkish: 'Sadece doğrudan komşunla konuş', explanation: 'a.b.c.d.foo() train wreck.', scenario: '<h5>Senaryo · Long getter chain</h5><p>Refactor.</p>' },
+      { id: 'pola', technical: 'POLA', acronym: 'Principle of Least Astonishment', turkish: 'En az şaşırtma', explanation: 'Beklenen davranış.', scenario: '<h5>Senaryo · save() metodu silmemeli</h5><p>İsme uygun.</p>' },
+      { id: 'grasp', technical: 'GRASP', acronym: 'Sorumluluk atama prensipleri', turkish: '9 sorumluluk prensibi', explanation: 'Info Expert, Creator, Controller, ...', scenario: '<h5>Senaryo · "Hangi sınıfa ait"</h5><p>GRASP rehber.</p>' },
+      { id: 'cupid', technical: 'CUPID', acronym: 'Composable, Unix-like, Predictable, Idiomatic, Domain-based', turkish: 'Modern alternatif SOLID', explanation: 'Dan North.', scenario: '<h5>Senaryo · Unix-like tek iş</h5><p>Modern bakış.</p>' },
+      { id: 'reactive_manifesto', technical: 'Reactive Manifesto', acronym: 'Responsive Resilient Elastic Message-Driven', turkish: 'Reaktif sistemler 4 ayak', explanation: 'EDA uyumlu.', scenario: '<h5>Senaryo · RabbitMQ + circuit + scaling</h5><p>Pratik karşılığı.</p>' }
+    ]}]});
+
+    /* === 15 — GoF Creational === */
+    CATEGORIES.push({ id: 'gof_creat', title: 'GoF — Creational Pattern', subtitle: 'Nesne yaratım desenleri.', icon: 'ph ph-plus-circle', iconBg: '#FFE9E0', iconColor: '#9A3412', questions: [{ id: 'gof_c', title: 'Creational pattern\'ler (birden fazla)?', purpose: 'Meta-framework içinde nesne yaratımı.', multiSelect: true, options: [
+      { id: 'factory_method', technical: 'Factory Method', acronym: 'Fabrika metodu', turkish: 'Oluşturmayı alt sınıflara devret', explanation: 'En yaygın creational.', scenario: '<h5>Senaryo · PaymentProcessorFactory</h5><p>create("iyzico") → Iyzico.</p>' },
+      { id: 'abstract_factory', technical: 'Abstract Factory', acronym: 'Soyut fabrika', turkish: 'İlişkili nesne aileleri', explanation: 'Bir ailenin tüm bileşenleri.', scenario: '<h5>Senaryo · DatabaseFactory</h5><p>Connection + QueryBuilder + Migration uyumlu.</p>' },
+      { id: 'builder', technical: 'Builder', acronym: 'İnşaatçı', turkish: 'Adım adım inşa', explanation: 'Karmaşık konfig için.', scenario: '<h5>Senaryo · QueryBuilder</h5><p>q.from().where().limit().</p>' },
+      { id: 'singleton', technical: 'Singleton', acronym: 'Tek örnek', turkish: 'Tek instance', explanation: 'Çoğunlukla kötü tercih.', scenario: '<h5>Senaryo · App config</h5><p>Python modül zaten singleton.</p>' },
+      { id: 'prototype', technical: 'Prototype', acronym: 'Prototip', turkish: 'Var olanı klonla', explanation: 'copy.deepcopy.', scenario: '<h5>Senaryo · Default config türetme</h5><p>Klonla, modifiye et.</p>' }
+    ]}]});
+
+    /* === 16 — GoF Structural === */
+    CATEGORIES.push({ id: 'gof_struct', title: 'GoF — Structural Pattern', subtitle: 'Sınıf/nesne yapısı desenleri.', icon: 'ph ph-shapes', iconBg: '#FFE9E0', iconColor: '#9A3412', questions: [{ id: 'gof_s', title: 'Structural pattern\'ler (birden fazla)?', purpose: 'Bileşenler bir araya nasıl gelir.', multiSelect: true, options: [
+      { id: 'adapter', technical: 'Adapter', acronym: 'Adaptör', turkish: 'Uyumsuz arayüzleri çevir', explanation: '3.parti entegrasyonlarda standart.', scenario: '<h5>Senaryo · iyzico → ortak PaymentGateway</h5><p>Adapter ile ortak arayüz.</p>' },
+      { id: 'bridge', technical: 'Bridge', acronym: 'Köprü', turkish: 'Soyutlama-implementasyon ayır', explanation: 'Çoklu boyutta varyasyon.', scenario: '<h5>Senaryo · Notification × kanal × format</h5><p>Cross-product\'tan kurtarır.</p>' },
+      { id: 'composite', technical: 'Composite', acronym: 'Bileşik', turkish: 'Ağaç yapısı tek arayüz', explanation: 'Menü, dosya sistemi.', scenario: '<h5>Senaryo · Yorum ağacı</h5><p>Tek/grup aynı arayüz.</p>' },
+      { id: 'decorator', technical: 'Decorator', acronym: 'Süsleyici', turkish: 'Çalışma zamanı davranış ekle', explanation: 'Python decorator native.', scenario: '<h5>Senaryo · @cache @auth @rate_limit</h5><p>Meta-framework temel.</p>' },
+      { id: 'facade', technical: 'Facade', acronym: 'Cephe', turkish: 'Karmaşık alt sisteme basit arayüz', explanation: 'Tek noktadan kullan.', scenario: '<h5>Senaryo · PaymentFacade</h5><p>iyzico + stok + fatura + log tek charge().</p>' },
+      { id: 'flyweight', technical: 'Flyweight', acronym: 'Sineksiklet', turkish: 'Benzer nesneleri paylaş', explanation: 'Hafıza optimizasyonu.', scenario: '<h5>Senaryo · Font cache</h5><p>Pratikte nadiren.</p>' },
+      { id: 'proxy', technical: 'Proxy', acronym: 'Vekil', turkish: 'Erişimi vekille kontrol et', explanation: 'Lazy load, security, logging.', scenario: '<h5>Senaryo · LazyDataProxy</h5><p>Ağır veri istek anında.</p>' }
+    ]}]});
+
+    /* === 17 — GoF Behavioral === */
+    CATEGORIES.push({ id: 'gof_behav', title: 'GoF — Behavioral Pattern', subtitle: 'Nesneler arası davranış.', icon: 'ph ph-arrows-out', iconBg: '#FFE9E0', iconColor: '#9A3412', questions: [{ id: 'gof_b', title: 'Behavioral pattern\'ler (birden fazla)?', purpose: 'Etkileşim ve sorumluluk paylaşımı.', multiSelect: true, options: [
+      { id: 'chain_of_responsibility', technical: 'Chain of Responsibility', acronym: 'Sorumluluk zinciri', turkish: 'Zincirde ilerlet', explanation: 'Middleware.', scenario: '<h5>Senaryo · FastAPI middleware</h5><p>Auth → Rate → Log → Endpoint.</p>' },
+      { id: 'command', technical: 'Command', acronym: 'Komut', turkish: 'İstek nesneye sar', explanation: 'Undo/redo, queue.', scenario: '<h5>Senaryo · Celery task</h5><p>Task = Command.</p>' },
+      { id: 'iterator', technical: 'Iterator', acronym: 'Yineleyici', turkish: 'Koleksiyonu içini göstermeden gez', explanation: 'Python __iter__.', scenario: '<h5>Senaryo · for x in collection</h5><p>Native.</p>' },
+      { id: 'mediator', technical: 'Mediator', acronym: 'Arabulucu', turkish: 'İletişimi merkeze topla', explanation: 'Karmaşık iletişimi sadeleştir.', scenario: '<h5>Senaryo · ChatRoom</h5><p>Room broadcast eder.</p>' },
+      { id: 'memento', technical: 'Memento', acronym: 'Anı', turkish: 'Snapshot al', explanation: 'Undo için.', scenario: '<h5>Senaryo · Editor undo</h5><p>State stack.</p>' },
+      { id: 'observer', technical: 'Observer', acronym: 'Gözlemci', turkish: 'Tek-çok abonelik', explanation: 'Event listener.', scenario: '<h5>Senaryo · Domain event publish/subscribe</h5><p>EDA temeli.</p>' },
+      { id: 'state', technical: 'State', acronym: 'Durum', turkish: 'İç duruma göre davran', explanation: 'State machine.', scenario: '<h5>Senaryo · Order pending→paid→shipped</h5><p>Davranış duruma göre.</p>' },
+      { id: 'strategy', technical: 'Strategy', acronym: 'Strateji', turkish: 'Algoritmayı dışarı enjekte', explanation: 'Pluggable algoritma.', scenario: '<h5>Senaryo · SortStrategy, PricingStrategy</h5><p>Farklı kural setleri.</p>' },
+      { id: 'template_method', technical: 'Template Method', acronym: 'Şablon metodu', turkish: 'İskelet sabit, adımlar override', explanation: 'Base class + abstract step.', scenario: '<h5>Senaryo · ImportPipeline</h5><p>parse → validate → save.</p>' },
+      { id: 'visitor', technical: 'Visitor', acronym: 'Ziyaretçi', turkish: 'Yeni operasyon ekle', explanation: 'AST gezme.', scenario: '<h5>Senaryo · AST analizi</h5><p>Compiler/linter.</p>' },
+      { id: 'interpreter', technical: 'Interpreter', acronym: 'Yorumlayıcı', turkish: 'Dil/dilbilgisi yorumlayıcı', explanation: 'DSL yapacaksanız.', scenario: '<h5>Senaryo · Filter DSL</h5><p>price > 100 AND city = X.</p>' }
+    ]}]});
+
+    /* === 18 — PoEAA === */
+    CATEGORIES.push({ id: 'poeaa', title: 'Enterprise Application Patterns (PoEAA)', subtitle: 'Martin Fowler kurumsal uygulama kataloğu.', icon: 'ph ph-building', iconBg: '#F5D0FE', iconColor: '#86198F', questions: [{ id: 'poeaa_secim', title: 'PoEAA pattern\'leri (birden fazla)?', purpose: 'Veri katmanı ve uygulama servisi.', multiSelect: true, options: [
+      { id: 'repository', preset: true, technical: 'Repository', acronym: 'Depo', turkish: 'Koleksiyon benzeri veri arayüzü', explanation: 'Domain SQLAlchemy detayına bağlı kalmaz.', scenario: '<h5>Senaryo · OrderRepository</h5><p>save/find/findBy. <strong>Kesin.</strong></p>' },
+      { id: 'unit_of_work', preset: true, technical: 'Unit of Work', acronym: 'İşlem birimi', turkish: 'Transaction değişikliklerini topla commit', explanation: 'SQLAlchemy Session zaten UoW.', scenario: '<h5>Senaryo · async with uow:</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'data_mapper', preset: true, technical: 'Data Mapper', acronym: 'Veri haritalayıcı', turkish: 'Domain ve DB şeması bağımsız', explanation: 'SQLAlchemy mapper.', scenario: '<h5>Senaryo · Pydantic domain + SQLAlchemy model</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'service_layer', preset: true, technical: 'Service Layer', acronym: 'Servis katmanı', turkish: 'Use-case uygulama katmanı', explanation: 'PlaceOrderService.', scenario: '<h5>Senaryo · Endpoint → Service → Domain</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'lazy_load', technical: 'Lazy Load', acronym: 'Geciktirilmiş yükleme', turkish: 'İhtiyaç anında yükle', explanation: 'N+1 tuzağı, dikkatli.', scenario: '<h5>Senaryo · SQLAlchemy lazy</h5><p>Eager load tercih.</p>' },
+      { id: 'identity_map', technical: 'Identity Map', acronym: 'Kimlik haritası', turkish: 'Aynı kaydı tek nesne', explanation: 'SQLAlchemy Session native.', scenario: '<h5>Senaryo · Aynı user tek instance</h5><p>Cache benzeri.</p>' },
+      { id: 'active_record', technical: 'Active Record', acronym: 'Aktif kayıt', turkish: 'Kayıt + davranış aynı sınıfta', explanation: 'Django tarzı. Data Mapper ile çakışır.', scenario: '<h5>Senaryo · Hızlı CRUD</h5><p>Data Mapper seçtiyseniz seçmeyin.</p>' },
+      { id: 'gateway', technical: 'Gateway', acronym: 'Geçit', turkish: 'Dış sistem için sade arayüz', explanation: 'Stripe, iyzico için.', scenario: '<h5>Senaryo · StripeGateway</h5><p>Adapter ile.</p>' },
+      { id: 'registry', technical: 'Registry', acronym: 'Kayıt defteri', turkish: 'Global erişim kayıtlı nesneler', explanation: 'Plugin registry için.', scenario: '<h5>Senaryo · PluginRegistry</h5><p>Meta-framework plugin keşfi.</p>' },
+      { id: 'table_module', technical: 'Table Module', acronym: 'Tablo modülü', turkish: 'Tablo başına davranış sınıfı', explanation: '.NET DataSet tarzı.', scenario: '<h5>Senaryo · Eski .NET</h5><p>Modern tercih değil.</p>' },
+      { id: 'transaction_script', technical: 'Transaction Script', acronym: 'İşlem betiği', turkish: 'Her use-case bir prosedür', explanation: 'Domain zayıfsa kabul.', scenario: '<h5>Senaryo · Basit CRUD</h5><p>Karmaşık domain için yetersiz.</p>' }
+    ]}]});
+
+    /* === 19 — VERI ŞEMALAR === */
+    CATEGORIES.push({ id: 'veri_sema', title: 'Veri Mimarisi · Şemalar', subtitle: 'OLTP normalize ve analitik şemalar.', icon: 'ph ph-tree-view', iconBg: '#CFFAFE', iconColor: '#155E75', questions: [{ id: 'sema', title: 'Şema yaklaşımları (birden fazla)?', purpose: 'Operasyonel ve analitik veri modeli.', multiSelect: true, options: [
+      { id: 'third_normal_form', preset: true, technical: '3NF', acronym: 'Third Normal Form', turkish: 'Üçüncü normal form', explanation: 'OLTP standartı.', scenario: '<h5>Senaryo · Postgres</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'star_schema', technical: 'Star Schema', acronym: 'Yıldız', turkish: 'Fact + denormalized dimension', explanation: 'Analytics için.', scenario: '<h5>Senaryo · Lakehouse</h5><p>fact_orders + dim_*.</p>' },
+      { id: 'snowflake_schema', technical: 'Snowflake Schema', acronym: 'Kar tanesi', turkish: 'Normalize dimension', explanation: 'Star\'ın normalize hâli.', scenario: '<h5>Senaryo · Karmaşık hiyerarşi</h5><p>Daha çok join.</p>' },
+      { id: 'galaxy_schema', technical: 'Galaxy Schema', acronym: 'Galaksi', turkish: 'Çok fact paylaşılan dim', explanation: 'Çoklu fact.', scenario: '<h5>Senaryo · Büyük DWH</h5><p>order + payment fact.</p>' }
+    ]}]});
+
+    /* === 20 — VERI DEPO === */
+    CATEGORIES.push({ id: 'veri_depo', title: 'Veri Mimarisi · Depo Tipleri', subtitle: 'OLTP, OLAP, warehouse, lake, lakehouse, mesh.', icon: 'ph ph-database', iconBg: '#CFFAFE', iconColor: '#155E75', questions: [{ id: 'depo', title: 'Veri deposu tipleri (birden fazla)?', purpose: 'Operasyonel → analitik yolculuk.', multiSelect: true, options: [
+      { id: 'oltp', preset: true, technical: 'OLTP', acronym: 'Online Transaction Processing', turkish: 'Operasyonel DB', explanation: 'Postgres zaten OLTP.', scenario: '<h5>Senaryo · Postgres ana DB</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'olap', technical: 'OLAP', acronym: 'Online Analytical Processing', turkish: 'Analitik DB', explanation: 'ClickHouse, DuckDB.', scenario: '<h5>Senaryo · Hızlı analytics</h5><p>Operasyonel DB\'yi yormaz.</p>' },
+      { id: 'data_warehouse', technical: 'Data Warehouse', acronym: 'Veri ambarı', turkish: 'Yapılandırılmış schema-on-write', explanation: 'BigQuery, Snowflake.', scenario: '<h5>Senaryo · BI raporları</h5><p>Klasik analitik.</p>' },
+      { id: 'data_lake', technical: 'Data Lake', acronym: 'Veri gölü', turkish: 'Ham schema-on-read', explanation: 'S3/R2 ham veri.', scenario: '<h5>Senaryo · Log + click + IoT</h5><p>Her şey ham.</p>' },
+      { id: 'data_lakehouse', technical: 'Data Lakehouse', acronym: 'Lake + warehouse', turkish: 'Delta/Iceberg ile', explanation: 'Modern analytics tercihi.', scenario: '<h5>Senaryo · Apache Iceberg + DuckDB/Trino</h5><p>R2/S3 üstünde.</p>' },
+      { id: 'data_mesh', technical: 'Data Mesh', acronym: 'Domain-owned data', turkish: 'Federe veri ürünleri', explanation: 'Büyük şirketler.', scenario: '<h5>Senaryo · Multi-domain</h5><p>Erken aşama için ağır.</p>' },
+      { id: 'medallion', technical: 'Medallion', acronym: 'Bronze/Silver/Gold', turkish: 'Bronze/Silver/Gold katmanlama', explanation: 'Lakehouse içinde.', scenario: '<h5>Senaryo · Veri kalite katmanları</h5><p>Bronze → Silver → Gold.</p>' }
+    ]}]});
+
+    /* === 21 — VERI IŞLEME === */
+    CATEGORIES.push({ id: 'veri_islem', title: 'Veri Mimarisi · İşleme', subtitle: 'Batch ve stream işleme.', icon: 'ph ph-circuitry', iconBg: '#CFFAFE', iconColor: '#155E75', questions: [{ id: 'islem', title: 'İşleme mimarisi (birden fazla)?', purpose: 'Veriyi ne zaman ve nasıl işleyeceğiz.', multiSelect: true, options: [
+      { id: 'batch', technical: 'Batch', acronym: 'Toplu', turkish: 'Toplu periyodik işleme', explanation: 'Airflow, Prefect, Dagster.', scenario: '<h5>Senaryo · Gecelik rapor</h5><p>03:00 Airflow DAG.</p>' },
+      { id: 'stream', technical: 'Stream', acronym: 'Akış', turkish: 'Olay olur olmaz işleme', explanation: 'Kafka/Faust/Bytewax.', scenario: '<h5>Senaryo · Real-time fraud</h5><p>Her tx anında.</p>' },
+      { id: 'lambda', technical: 'Lambda', acronym: 'Batch + stream', turkish: 'Hibrit', explanation: 'Geçmiş batch + güncel stream.', scenario: '<h5>Senaryo · Hibrit analytics</h5><p>Operasyonel karmaşıklık.</p>' },
+      { id: 'kappa', technical: 'Kappa', acronym: 'Sadece stream', turkish: 'Tek stream kanal', explanation: 'Daha sade.', scenario: '<h5>Senaryo · Event sourcing + stream</h5><p>Replay imkanı.</p>' }
+    ]}]});
+
+    /* === 22 — TEST PARADIGMALARI === */
+    CATEGORIES.push({ id: 'test_para', title: 'Test Paradigmaları', subtitle: 'TDD, BDD, mutation, chaos, contract.', icon: 'ph ph-test-tube', iconBg: '#F3E8FF', iconColor: '#6B21A8', questions: [{ id: 'test_yaklasim', title: 'Test yaklaşımları (birden fazla)?', purpose: 'Önce test, sonra development kullanıcı tercihi.', multiSelect: true, options: [
+      { id: 'tdd', preset: true, technical: 'TDD', acronym: 'Test-Driven Development', turkish: 'Önce test, sonra kod', explanation: 'Kullanıcı preference.', scenario: '<h5>Senaryo · Önceki preference</h5><p>"İlk test, sonra dev". <strong>Kesin.</strong></p>' },
+      { id: 'bdd', technical: 'BDD', acronym: 'Behavior-Driven', turkish: 'Davranış odaklı Given/When/Then', explanation: 'pytest-bdd, behave.', scenario: '<h5>Senaryo · İş paydaşıyla ortak dil</h5><p>Feature dosyaları.</p>' },
+      { id: 'atdd', technical: 'ATDD', acronym: 'Acceptance Test-Driven', turkish: 'Kabul testi odaklı', explanation: 'BDD\'nin akrabası.', scenario: '<h5>Senaryo · Kabul kriteri otomatik</h5><p>İş analizi → test.</p>' },
+      { id: 'property_based', technical: 'Property-Based', acronym: 'Özellik tabanlı', turkish: 'Rastgele girdi + invariant', explanation: 'Hypothesis kütüphanesi.', scenario: '<h5>Senaryo · Pure fonksiyon</h5><p>1000 rastgele input.</p>' },
+      { id: 'mutation_testing', technical: 'Mutation Testing', acronym: 'Mutasyon', turkish: 'Koda değişiklik enjekte', explanation: 'mutmut Python.', scenario: '<h5>Senaryo · Test kalitesi ölçümü</h5><p>%80 coverage anlamlı mı.</p>' },
+      { id: 'contract_testing', technical: 'Contract Testing', acronym: 'Sözleşme testi', turkish: 'Tüketici-üretici sözleşme', explanation: 'Pact framework.', scenario: '<h5>Senaryo · BFF ↔ Core kontratı</h5><p>API kırılırsa CI yakalar.</p>' },
+      { id: 'snapshot_testing', technical: 'Snapshot Testing', acronym: 'Anlık görüntü', turkish: 'Referansla karşılaştır', explanation: 'API response snapshot.', scenario: '<h5>Senaryo · API yanıt değişimi</h5><p>İstemsiz değişim yakalanır.</p>' },
+      { id: 'chaos_engineering', technical: 'Chaos Engineering', acronym: 'Kaos mühendisliği', turkish: 'Üretimde kasıtlı arıza', explanation: 'Sıfır downtime + multi-region için.', scenario: '<h5>Senaryo · Frankfurt kapat</h5><p>Helsinki devraldı mı?</p>' },
+      { id: 'fuzz_testing', technical: 'Fuzz Testing', acronym: 'Bulanık test', turkish: 'Anormal/rastgele girdi', explanation: 'atheris.', scenario: '<h5>Senaryo · Parser güvenliği</h5><p>Beklenmedik input crash testi.</p>' }
+    ]}]});
+
+    /* === 23 — OPERASYON DEPLOYMENT === */
+    CATEGORIES.push({ id: 'op_dep', title: 'Operasyon ve Deployment', subtitle: 'Immutable infra, GitOps, IaC, blue/green, canary.', icon: 'ph ph-truck', iconBg: '#FEF9C3', iconColor: '#854D0E', questions: [{ id: 'op_pat', title: 'Operasyon pattern\'leri (birden fazla)?', purpose: 'Yayın güvenliği ve tekrar üretilebilir altyapı.', multiSelect: true, options: [
+      { id: 'immutable_infrastructure', preset: true, technical: 'Immutable Infrastructure', acronym: 'Değişmez altyapı', turkish: 'Sunucu yeniden yarat', explanation: 'Docker image tek doğru kaynak.', scenario: '<h5>Senaryo · Docker Swarm + image push</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'iac', preset: true, technical: 'IaC', acronym: 'Infrastructure as Code', turkish: 'Altyapı kod', explanation: 'Terraform/Pulumi. Multi-region + 15dk RTO için.', scenario: '<h5>Senaryo · Terraform bölge ayağa</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'rolling_update', preset: true, technical: 'Rolling Update', acronym: 'Kademeli güncelleme', turkish: 'Sırayla değiştir', explanation: 'Önceki seçim.', scenario: '<h5>Senaryo · Swarm rolling</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'feature_flags', preset: true, technical: 'Feature Flags', acronym: 'Özellik bayrakları', turkish: 'Deploy ile aç-kapat ayrı', explanation: 'GrowthBook önceki seçim.', scenario: '<h5>Senaryo · GrowthBook</h5><p><strong>Kesin.</strong></p>' },
+      { id: 'gitops', technical: 'GitOps', acronym: 'Git tek doğru kaynak', turkish: 'Git repo tek doğru kaynak', explanation: 'ArgoCD, Flux. K8s\'le güçlü.', scenario: '<h5>Senaryo · K8s geçişte</h5><p>Swarm için sınırlı.</p>' },
+      { id: 'blue_green_deployment', technical: 'Blue-Green', acronym: 'Mavi-yeşil', turkish: 'İki paralel ortam', explanation: 'Sıfır downtime alternatif.', scenario: '<h5>Senaryo · Major release</h5><p>Maliyet 2x.</p>' },
+      { id: 'canary_deployment', technical: 'Canary', acronym: 'Kanarya', turkish: 'Yeni sürümü %X aç', explanation: 'Flag + LB ile.', scenario: '<h5>Senaryo · %5 → %50</h5><p>Riskli özellik.</p>' },
+      { id: 'ab_testing', technical: 'A/B Testing', acronym: 'A/B testi', turkish: 'İki varyantı dağıt', explanation: 'GrowthBook destek.', scenario: '<h5>Senaryo · Yeni UI</h5><p>Dönüşüm ölçümü.</p>' },
+      { id: 'dark_launch', technical: 'Dark Launch', acronym: 'Karanlık başlatma', turkish: 'Gizli çalıştır, gösterme', explanation: 'Performans test.', scenario: '<h5>Senaryo · Yeni search backend</h5><p>Eski göster, yeni paralel ölç.</p>' },
+      { id: 'shadow_traffic', technical: 'Shadow Traffic', acronym: 'Gölge trafik', turkish: 'Gerçek trafiği paralel gönder', explanation: 'Sadece ölç, gösterme.', scenario: '<h5>Senaryo · Microservice geçiş</h5><p>Prod yükü altında test.</p>' }
+    ]}]});
+
+    /* === 24 — WATERFALL EK ARAŞTIRMA === */
+    CATEGORIES.push({ id: 'waterfall_ek', title: 'Waterfall Ek Araştırma Konuları', subtitle: 'Önceki + bu raporda yer almayan, teknik ekibin bilmesi gereken konular. Seçtikleriniz "araştır" promptuyla derinleştirilir.', icon: 'ph ph-magnifying-glass-plus', iconBg: '#FEE2E2', iconColor: '#991B1B', questions: [{ id: 'ek_konu', title: 'Hangi ek konuları araştıralım (birden fazla)?', purpose: 'Waterfall proje tanımı için teknik ekibe ek bilgi katmanı.', multiSelect: true, options: [
+      { id: 'adr', technical: 'ADR — Architecture Decision Records', acronym: 'Mimari karar kayıtları', turkish: 'Mimari kararların gerekçeli kaydı', explanation: 'Her büyük kararın bağlam-karar-sonuç belgelenmesi.', scenario: '<h5>Senaryo · /docs/adr/0001-fastapi.md</h5><p>3 yıl sonra "neden FastAPI" cevabı.</p>' },
+      { id: 'rfc_diataxis', technical: 'Diátaxis / RFC süreci', acronym: 'Belgeleme metodolojisi', turkish: 'Tutorial/How-to/Reference/Explanation', explanation: 'Belgeleme çerçevesi + RFC.', scenario: '<h5>Senaryo · /docs Diátaxis</h5><p>Yeni dev nerede ne bulacağını bilir.</p>' },
+      { id: 'sre_slo', technical: 'SRE — SLA/SLO/SLI/Error Budget', acronym: 'Site Reliability Engineering', turkish: 'Sözleşme/hedef/gösterge + hata bütçesi', explanation: 'Ne kadar arıza kabul edilir.', scenario: '<h5>Senaryo · %99.9 SLO</h5><p>Aylık 43dk bütçe tükendi → release dondur.</p>' },
+      { id: 'incident_runbook', technical: 'Incident Response & Runbook', acronym: 'Olay yanıt süreci', turkish: 'Üretim olayı adımları', explanation: 'Runbook + post-mortem + blameless.', scenario: '<h5>Senaryo · DB down</h5><p>Adım 1, 2, 3 + Telegram/PagerDuty.</p>' },
+      { id: 'sbom_supply', technical: 'SBOM / Supply Chain Security', acronym: 'Yazılım malzeme listesi', turkish: 'Bağımlılık izleme + güvenlik', explanation: 'SPDX/CycloneDX, Dependabot, sigstore.', scenario: '<h5>Senaryo · log4j-vari zafiyet</h5><p>Etkilenen servisleri 5dk\'da tespit.</p>' },
+      { id: 'finops', technical: 'FinOps / TCO modeli', acronym: 'Bulut maliyet yönetimi', turkish: 'TCO + bulut maliyet izleme', explanation: 'AWS/Hetzner faturası kontrol.', scenario: '<h5>Senaryo · LLM 5k USD/ay</h5><p>Cost dashboard + alert.</p>' },
+      { id: 'fitness_functions', technical: 'Architecture Fitness Functions', acronym: 'Mimari uygunluk testleri', turkish: 'Mimari kuralları otomatik test', explanation: 'ArchUnit-vari testler.', scenario: '<h5>Senaryo · Hexagonal kuralı CI\'da</h5><p>Domain klasörü framework import etmesin.</p>' },
+      { id: 'data_contracts', technical: 'Data Contracts', acronym: 'Veri sözleşmeleri', turkish: 'Producer-consumer şema', explanation: 'Olay/tablo şemaları sözleşme.', scenario: '<h5>Senaryo · OrderPlaced şeması</h5><p>Üretici bozarsa CI fail.</p>' },
+      { id: 'privacy_eng', technical: 'Privacy Engineering', acronym: 'Gizlilik mühendisliği', turkish: 'Privacy by design', explanation: 'Minimizasyon, k-anonymity, differential privacy.', scenario: '<h5>Senaryo · Analytics anonimleştirme</h5><p>KVKK + GDPR sistematik.</p>' },
+      { id: 'api_versioning', technical: 'API Versioning Strategy', acronym: 'API sürümlendirme', turkish: 'URL vs header vs accept', explanation: 'SemVer, deprecation, sunset.', scenario: '<h5>Senaryo · /v2 vs /v1 paralel</h5><p>Mobil eski 6 ay desteklenir.</p>' },
+      { id: 'vendor_lockin', technical: 'Vendor Lock-in & Exit Plan', acronym: 'Tedarikçi bağımlılığı', turkish: 'Çıkış stratejisi', explanation: 'Cloudflare\'den taşınabilirlik, OTel.', scenario: '<h5>Senaryo · Datadog\'tan kaçış</h5><p>OTel SDK ile collector değiştir.</p>' },
+      { id: 'team_topologies', technical: 'Team Topologies', acronym: 'Ekip topolojisi', turkish: 'Stream-aligned, Platform, Enabling', explanation: 'Conway\'s Law uygulaması.', scenario: '<h5>Senaryo · Meta-framework Platform ekibi</h5><p>Stream-aligned ekipler ürün yazar.</p>' },
+      { id: 'dx_metrics', technical: 'Developer Experience (DX)', acronym: 'Geliştirici deneyimi', turkish: 'DORA metrikleri + DX anket', explanation: 'Deploy freq, MTTR, change fail rate.', scenario: '<h5>Senaryo · Aylık DORA report</h5><p>Verimlilik ölçüm.</p>' },
+      { id: 'sustainability', technical: 'Sustainability / Green Software', acronym: 'Yeşil yazılım', turkish: 'Karbon farkındalı bilişim', explanation: 'Carbon-aware computing.', scenario: '<h5>Senaryo · Helsinki rüzgar enerjisi</h5><p>Bölge tercihi.</p>' },
+      { id: 'ai_safety', technical: 'AI Safety / Prompt Injection', acronym: 'LLM güvenliği', turkish: 'Jailbreak, prompt injection, output filtering', explanation: 'AI özellikleri seçildi → şart.', scenario: '<h5>Senaryo · Chatbot input sanitization</h5><p>Sistem prompt sızıntısı, veri koruma.</p>' },
+      { id: 'compliance_audit', technical: 'Compliance Audit Hazırlığı', acronym: 'SOC2/ISO 27001', turkish: 'Denetim hazırlık süreci', explanation: 'Kurumsal müşteri için.', scenario: '<h5>Senaryo · Enterprise satışı</h5><p>SOC2 Type II 9-12 ay.</p>' },
+      { id: 'dr_drill', technical: 'DR Tatbikat (Game Day)', acronym: 'Felaket kurtarma egzersizleri', turkish: 'Düzenli felaket simülasyonu', explanation: 'RPO/RTO gerçekte tutuyor mu.', scenario: '<h5>Senaryo · 3 ayda bir gameday</h5><p>15dk\'da geçtin mi?</p>' },
+      { id: 'kms_crypto', technical: 'Şifreleme + KMS', acronym: 'At-rest/in-transit + key rotation', turkish: 'Şifreleme yaşam döngüsü', explanation: 'KMS, key rotation, envelope.', scenario: '<h5>Senaryo · Postgres at-rest + Cloudflare in-transit</h5><p>+ Vault key rotation.</p>' },
+      { id: 'lokalizasyon_qa', technical: 'Lokalizasyon QA', acronym: 'L10n test çerçevesi', turkish: 'RTL/tarih/sayı edge case', explanation: 'TR+EN+AR+RU seçildi.', scenario: '<h5>Senaryo · Arapça RTL form</h5><p>İkonlar ters, tarih doğru.</p>' },
+      { id: 'open_source_license', technical: 'Open Source Lisans Yönetimi', acronym: 'Lisans uyumu', turkish: 'GPL/MIT/Apache matris', explanation: 'Karma lisans seçildi.', scenario: '<h5>Senaryo · GPL bağımlılığını ticari ürüne</h5><p>FOSSA/Snyk lisans audit.</p>' },
+      { id: 'observability_traces', technical: 'Distributed Tracing & Correlation ID', acronym: 'Dağıtık iz takibi', turkish: 'Request servisler arası yolculuk', explanation: 'OTel + correlation ID disiplini.', scenario: '<h5>Senaryo · "Bu user için ne yaşandı"</h5><p>X-Request-ID ile log+trace+metrik.</p>' },
+      { id: 'dataops_quality', technical: 'DataOps & Veri Kalitesi', acronym: 'Veri kalite gözlemlenebilirliği', turkish: 'Great Expectations, dbt tests', explanation: 'Sessiz veri kalite hataları.', scenario: '<h5>Senaryo · Analytics raporu yanlış</h5><p>Veri kalite alarmı önceden çalmalı.</p>' }
+    ]}]});
+
+    /* ====== STATE ====== */
+    const state = { answers: {}, customInputs: {} };
+    const LS_KEY = 'mimari-sihirbazi-v2';
+
+    function load() {
+      try {
+        const s = JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+        if (s && typeof s === 'object') {
+          state.answers = s.answers || {};
+          state.customInputs = s.customInputs || {};
+        }
+      } catch(e) { /* ignore */ }
+      applyPresets();
+    }
+    function applyPresets() {
+      // İlk yükleme: preset=true olan opsiyonlar henüz hiç dokunulmamış soruda otomatik işaretlenir.
+      // Kullanıcı bir cevap verdiyse (state.answers'da varsa) preset uygulanmaz.
+      CATEGORIES.forEach(c => {
+        c.questions.forEach(q => {
+          const key = c.id + '__' + q.id;
+          if (state.answers[key]) return; // dokunulmuş, atla
+          const presets = (q.options || []).filter(o => o.preset).map(o => o.id);
+          if (presets.length) state.answers[key] = presets;
+        });
+      });
+    }
+    function persist() {
+      try { localStorage.setItem(LS_KEY, JSON.stringify({ answers: state.answers, customInputs: state.customInputs })); } catch(e) {}
+    }
+
+    /* ====== RENDER ====== */
+    function render() {
+      // nav
+      const navHtml = CATEGORIES.map(c => `
+        <li><a href="#cat-${c.id}" data-cat="${c.id}">
+          <i class="${c.icon}" aria-hidden="true"></i>
+          <span class="label">${c.title}</span>
+          <span class="nav-badge" data-nav-badge="${c.id}">0/${c.questions.length}</span>
+        </a></li>
+      `).join('');
+      const navEl = document.getElementById('nav-list');
+      if (navEl) navEl.innerHTML = navHtml;
+      const drawerNavBody = document.getElementById('drawer-nav-body');
+      if (drawerNavBody) drawerNavBody.innerHTML = `<h2 style="font-size:0.875rem;font-weight:500;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-muted);margin:0 0 12px;">Kategoriler</h2><ul class="nav-list">${navHtml}</ul>`;
+
+      // categories
+      document.getElementById('categories').innerHTML = CATEGORIES.map(renderCategory).join('');
+      attachListeners();
+      updateAll();
+    }
+
+    function renderCategory(c) {
+      return `
+        <section class="category" id="cat-${c.id}" aria-labelledby="cat-title-${c.id}">
+          <header class="category-header">
+            <span class="category-icon" style="background:${c.iconBg};color:${c.iconColor};" aria-hidden="true">
+              <i class="${c.icon}"></i>
+            </span>
+            <div>
+              <h2 class="category-title" id="cat-title-${c.id}">${c.title}</h2>
+              <p class="category-subtitle">${c.subtitle}</p>
+            </div>
+          </header>
+          ${c.questions.map(q => renderQuestion(c.id, q)).join('')}
+        </section>
+      `;
+    }
+
+    function renderQuestion(catId, q) {
+      const groupName = catId + '__' + q.id;
+      const inputType = q.multiSelect ? 'checkbox' : 'radio';
+      const visible = q.condition ? evalCondition(q.condition) : true;
+
+      const customOpt = {
+        id: 'custom',
+        is_custom: true,
+        technical: 'Anlamadım / Özel cevap yazayım',
+        acronym: '',
+        turkish: 'Bu soruda emin değilim — birlikte araştıralım',
+        explanation: 'Bu seçeneği işaretlediğinizde altta açılan kutuya sorunuzu ya da özel durumunuzu yazın. JSON çıktısında bu cevap "belirsiz: true" olarak işaretlenir, "belirsizleri araştır" promptu ile bana getirdiğinizde detaylı, teknik dilden arındırılmış şekilde araştırırız.',
+        scenario: '<h5>Ne zaman seçmeli?</h5><p>Seçenekler arasındaki farkı tam anlayamadığınızda, sektörünüze özel bir gereksinim olduğunda veya hiçbiri tam uymadığında. <strong>Bu seçim ayıp değil — sihirbazın amacı bunu yapmak.</strong></p>'
+      };
+      const options = (q.options || []).concat([customOpt]);
+      const selected = state.answers[groupName] || [];
+      const isCustomSelected = selected.includes('custom');
+
+      return `
+        <article class="question" data-question="${groupName}" ${visible ? '' : 'hidden'}>
+          <div class="question-header">
+            <h3 class="question-title">${q.title}</h3>
+            <div class="question-meta">
+              <p class="question-purpose"><span class="sr-only">Sorunun amacı:</span>${q.purpose}</p>
+              ${q.multiSelect ? '<span class="question-tag"><i class="ph ph-check-square" aria-hidden="true"></i>Birden fazla seçilebilir</span>' : ''}
+              ${q.condition ? '<span class="question-tag cond"><i class="ph ph-git-branch" aria-hidden="true"></i>Önceki cevaba bağlı</span>' : ''}
+            </div>
+          </div>
+          <fieldset class="options" data-group="${groupName}">
+            <legend class="sr-only">${q.title}</legend>
+            ${options.map(o => renderOption(groupName, o, inputType, selected)).join('')}
+          </fieldset>
+          ${isCustomSelected ? renderCustomInput(groupName) : ''}
+        </article>
+      `;
+    }
+
+    function renderOption(groupName, o, inputType, selected) {
+      const checked = selected.includes(o.id) ? 'checked' : '';
+      const customClass = o.is_custom ? ' option-custom' : (o.preset ? ' option-preset' : '');
+      const tech = escapeHtml(o.technical);
+      const acro = o.acronym ? `<span class="option-acronym">— ${escapeHtml(o.acronym)}</span>` : '';
+      const presetBadge = o.preset ? '<span class="auto-badge" title="Önceki kararlarınızla otomatik işaretlendi"><i class="ph ph-magic-wand" aria-hidden="true"></i>AUTO</span>' : '';
+      const tr = o.turkish ? `<div class="option-turkish">${escapeHtml(o.turkish)}</div>` : '';
+      const exp = o.explanation ? `<div class="option-explanation">${escapeHtml(o.explanation)}</div>` : '';
+      const det = o.scenario ? `
+        <details class="option-details">
+          <summary><i class="ph ph-info" aria-hidden="true"></i>Detaylar ve gerçek dünya senaryosu</summary>
+          <div class="scenario">${o.scenario}</div>
+        </details>` : '';
+      const inputId = 'opt-' + groupName + '-' + o.id;
+      return `
+        <label class="option${customClass}" for="${inputId}">
+          <div class="option-row">
+            <input id="${inputId}" type="${inputType}" name="${groupName}" value="${o.id}" ${checked}>
+            <div class="option-body">
+              <div class="option-technical">${tech}${acro}${presetBadge}</div>
+              ${tr}
+              ${exp}
+              ${det}
+            </div>
+          </div>
+        </label>
+      `;
+    }
+
+    function renderCustomInput(groupName) {
+      const val = escapeHtml(state.customInputs[groupName] || '');
+      return `
+        <div class="custom-input-panel">
+          <label for="custom-${groupName}">Anlamadığınız nokta ya da özel ihtiyacınız nedir? (Birlikte araştıracağız)</label>
+          <textarea id="custom-${groupName}" data-custom="${groupName}" rows="3" placeholder="Örnek: bu seçenekler arasındaki farkı anlamadım — hangisini neye göre seçmeliyim? Sektörümde özel olarak X durumu var, hangisi daha uygun?">${val}</textarea>
+          <div class="belirsiz-tag"><i class="ph ph-warning-circle" aria-hidden="true"></i>JSON çıktısında "belirsiz: true" olarak işaretlenecek</div>
+        </div>
+      `;
+    }
+
+    function evalCondition(cond) {
+      if (!cond) return true;
+      const sel = state.answers[cond.depends_on] || [];
+      if (cond.op === 'not') return !sel.includes(cond.value);
+      if (cond.op === 'equals') return sel.length === 1 && sel[0] === cond.value;
+      return sel.includes(cond.value);
+    }
+
+    /* ====== INTERACTION ====== */
+    function attachListeners() {
+      document.querySelectorAll('.options input').forEach(input => {
+        input.addEventListener('change', onAnswer);
+      });
+      document.querySelectorAll('textarea[data-custom]').forEach(t => {
+        t.addEventListener('input', onCustom);
+      });
+      document.querySelectorAll('details.option-details > summary').forEach(s => {
+        s.addEventListener('click', (e) => { e.stopPropagation(); });
+      });
+    }
+
+    function onAnswer(e) {
+      const name = e.target.name;
+      const val = e.target.value;
+      const isCheckbox = e.target.type === 'checkbox';
+      const cur = state.answers[name] || [];
+      if (isCheckbox) {
+        if (e.target.checked) state.answers[name] = [...cur.filter(v => v !== val), val];
+        else state.answers[name] = cur.filter(v => v !== val);
+        if (state.answers[name].length === 0) delete state.answers[name];
+      } else {
+        state.answers[name] = [val];
+      }
+      if (!(state.answers[name] || []).includes('custom')) delete state.customInputs[name];
+      persist();
+      render();
+    }
+
+    function onCustom(e) {
+      const name = e.target.dataset.custom;
+      state.customInputs[name] = e.target.value;
+      persist();
+      updateAll();
+    }
+
+    /* ====== EXPORT ====== */
+    function buildExport() {
+      const out = {
+        generated_at: new Date().toISOString(),
+        version: '1.0.0',
+        categories: {},
+        belirsiz_items: [],
+        summary: { total_questions: 0, answered: 0, belirsiz_count: 0, by_category: {} }
+      };
+      CATEGORIES.forEach(c => {
+        out.categories[c.id] = { title: c.title, answers: {} };
+        out.summary.by_category[c.id] = { answered: 0, total: c.questions.length, belirsiz: 0 };
+        c.questions.forEach(q => {
+          const visible = q.condition ? evalCondition(q.condition) : true;
+          if (!visible) return;
+          out.summary.total_questions++;
+          const key = c.id + '__' + q.id;
+          const sel = state.answers[key] || [];
+          const isAnswered = sel.length > 0;
+          if (isAnswered) { out.summary.answered++; out.summary.by_category[c.id].answered++; }
+
+          const isCustom = sel.includes('custom');
+          const customText = state.customInputs[key] || '';
+          const isBelirsiz = isCustom;
+          if (isBelirsiz) { out.summary.belirsiz_count++; out.summary.by_category[c.id].belirsiz++; }
+
+          const selectedLabels = sel.map(id => {
+            if (id === 'custom') return 'Özel / Belirsiz';
+            const opt = (q.options || []).find(o => o.id === id);
+            return opt ? opt.technical : id;
+          });
+
+          out.categories[c.id].answers[q.id] = {
+            question: q.title,
+            purpose: q.purpose,
+            multi_select: !!q.multiSelect,
+            selected_ids: sel,
+            selected_labels: selectedLabels,
+            is_custom: isCustom,
+            belirsiz: isBelirsiz,
+            user_input: isCustom ? customText : null
+          };
+
+          if (isBelirsiz) {
+            out.belirsiz_items.push({
+              category_id: c.id,
+              category_title: c.title,
+              question_id: q.id,
+              question: q.title,
+              purpose: q.purpose,
+              user_input: customText || '(Henüz açıklama yazılmadı)',
+              options_offered: (q.options || []).map(o => ({ id: o.id, technical: o.technical, turkish: o.turkish }))
+            });
+          }
+        });
+      });
+      return out;
+    }
+
+    function updateAll() {
+      const out = buildExport();
+      const pre = document.getElementById('json-preview');
+      if (pre) pre.textContent = JSON.stringify(out, null, 2);
+
+      const txt = (out.summary.answered + ' / ' + out.summary.total_questions + ' cevaplandı' + (out.summary.belirsiz_count ? (' · ' + out.summary.belirsiz_count + ' belirsiz') : ''));
+      const t = document.getElementById('progress-text');
+      if (t) t.textContent = txt;
+      const pct = out.summary.total_questions ? Math.round(100 * out.summary.answered / out.summary.total_questions) : 0;
+      const fill = document.getElementById('progress-fill');
+      if (fill) fill.style.width = pct + '%';
+
+      CATEGORIES.forEach(c => {
+        const cs = out.summary.by_category[c.id];
+        document.querySelectorAll('[data-nav-badge="' + c.id + '"]').forEach(bad => {
+          bad.textContent = cs.answered + '/' + cs.total;
+          const a = bad.closest('a');
+          if (a) {
+            a.classList.toggle('has-answers', cs.answered > 0);
+            a.classList.toggle('has-belirsiz', cs.belirsiz > 0);
+          }
+        });
+      });
+
+      const belirEl = document.getElementById('belirsiz-list');
+      if (belirEl) {
+        if (out.belirsiz_items.length) {
+          belirEl.innerHTML = '<h3><i class="ph ph-warning" aria-hidden="true"></i> Belirsiz (' + out.belirsiz_items.length + ')</h3><ul>' +
+            out.belirsiz_items.map(b => '<li><strong>' + escapeHtml(b.category_title) + ':</strong> ' + escapeHtml(b.question) + '</li>').join('') + '</ul>';
+        } else {
+          belirEl.innerHTML = '';
+        }
+      }
+    }
+
+    /* ====== HELPERS ====== */
+    function escapeHtml(s) {
+      return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+    }
+    function toast(msg) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.classList.add('visible');
+      setTimeout(() => t.classList.remove('visible'), 2400);
+    }
+    function buildResearchPrompt(out) {
+      return 'Aşağıdaki JSON, v2 mimari sihirbazı seçimlerimdir (paradigma + pattern). `belirsiz: true` olan kalemleri tek tek ele al:\n' +
+        '1) Seçenekler arasındaki farkı yatırımcı/yönetici diliyle, teknik jargondan arındırılmış açıkla.\n' +
+        '2) Her seçeneğin "ne zaman uygun, ne zaman yanlış tercih" olduğunu gerçek dünya senaryosuyla göster.\n' +
+        '3) v1 + v2 diğer cevaplarımla uyumlu en güçlü 1-2 öneriyi gerekçeleriyle ver.\n' +
+        '4) v2.html üzerinde hangi alanı işaretlememi gerektiğini açıkça yaz.\n' +
+        '5) Önerine göre v1\'de değişmesi gereken cevap varsa onları da listele.\n\n' +
+        'JSON:\n```json\n' + JSON.stringify(out, null, 2) + '\n```';
+    }
+    function buildWaterfallPrompt(out) {
+      const cat = out.categories && out.categories.waterfall_ek;
+      const ek = cat && cat.answers && cat.answers.ek_konu;
+      const selected = (ek && ek.selected_labels) || [];
+      if (!selected.length) {
+        return 'Waterfall ek araştırma promptu için "Waterfall Ek Araştırma Konuları" bölümünden en az 1 konu seçin.';
+      }
+      return 'Waterfall proje tanımı için teknik ekibe bilgi notları hazırla. Aşağıdaki konuların her biri için:\n' +
+        '1) Kavramın yatırımcı/yönetici diliyle 2-3 cümle açıklaması.\n' +
+        '2) Bu projedeki rolü (v1+v2 cevaplarımla bağı, neden bizim için kritik).\n' +
+        '3) Pratik uygulama önerisi: hangi araç, hangi süreç, hangi sorumlu rol.\n' +
+        '4) Ekibe verilecek "kabul kriterleri" (objektif ölçülebilir).\n' +
+        '5) İlk 30 günde atılması gereken 3 somut adım.\n\n' +
+        'Konular:\n- ' + selected.join('\n- ') + '\n\n' +
+        'Tam bağlam JSON:\n```json\n' + JSON.stringify(out, null, 2) + '\n```';
+    }
+
+    /* ====== BOOTSTRAP ====== */
+    document.addEventListener('DOMContentLoaded', () => {
+      load();
+      render();
+
+      document.getElementById('copy-json').addEventListener('click', () => {
+        navigator.clipboard.writeText(JSON.stringify(buildExport(), null, 2))
+          .then(() => toast('JSON panoya kopyalandı'));
+      });
+      document.getElementById('download-json').addEventListener('click', () => {
+        const data = JSON.stringify(buildExport(), null, 2);
+        const blob = new Blob([data], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mimari-secimleri-' + new Date().toISOString().slice(0, 10) + '.json';
+        document.body.appendChild(a); a.click(); a.remove();
+        URL.revokeObjectURL(url);
+        toast('JSON dosyası indirildi');
+      });
+      document.getElementById('copy-prompt').addEventListener('click', () => {
+        const prompt = buildResearchPrompt(buildExport());
+        navigator.clipboard.writeText(prompt).then(() => toast('Araştırma promptu panoya kopyalandı'));
+      });
+      document.getElementById('copy-waterfall').addEventListener('click', () => {
+        const prompt = buildWaterfallPrompt(buildExport());
+        navigator.clipboard.writeText(prompt).then(() => toast('Waterfall ek araştırma promptu panoya kopyalandı'));
+      });
+      document.getElementById('reset').addEventListener('click', () => {
+        if (!confirm('Tüm cevaplarınız silinecek (AUTO\'lar tekrar gelir). Onaylıyor musunuz?')) return;
+        state.answers = {}; state.customInputs = {};
+        applyPresets(); persist(); render();
+        toast('Sıfırlandı, AUTO seçenekler yeniden uygulandı');
+      });
+
+      // Mobile drawers
+      const drawerNav = document.getElementById('drawer-nav');
+      const drawerExport = document.getElementById('drawer-export');
+      document.getElementById('nav-toggle').addEventListener('click', () => { drawerNav.classList.add('open'); });
+      document.getElementById('panel-toggle').addEventListener('click', () => {
+        const body = document.getElementById('drawer-export-body');
+        body.innerHTML = document.querySelector('.panel-export').innerHTML;
+        // Re-bind buttons inside drawer
+        body.querySelectorAll('#copy-json').forEach(b => b.addEventListener('click', () => navigator.clipboard.writeText(JSON.stringify(buildExport(), null, 2)).then(() => toast('JSON kopyalandı'))));
+        drawerExport.classList.add('open');
+      });
+      document.querySelectorAll('[data-close-drawer]').forEach(b => {
+        b.addEventListener('click', () => document.getElementById(b.dataset.closeDrawer).classList.remove('open'));
+      });
+      [drawerNav, drawerExport].forEach(d => d.addEventListener('click', (e) => { if (e.target === d) d.classList.remove('open'); }));
+      document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { drawerNav.classList.remove('open'); drawerExport.classList.remove('open'); } });
+
+      // Active nav on scroll
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) {
+            document.querySelectorAll('.nav-list a').forEach(a => a.removeAttribute('aria-current'));
+            const id = e.target.id.replace('cat-', '');
+            document.querySelectorAll('.nav-list a[data-cat="' + id + '"]').forEach(a => a.setAttribute('aria-current', 'true'));
+          }
+        });
+      }, { rootMargin: '-30% 0px -60% 0px' });
+      document.querySelectorAll('.category').forEach(s => observer.observe(s));
+    });
+  </script>
+</body>
+</html>
